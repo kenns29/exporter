@@ -1,0 +1,32 @@
+repositories {
+  mavenCentral()
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+
+mainClassName = "edu.vader.exporter.Main"
+archivesBaseName = 'exporter'
+
+
+dependencies {
+	compile 'com.googlecode.json-simple:json-simple:1.1.1'
+	compile 'log4j:log4j:1.2.17'
+	compile 'org.apache.commons:commons-lang3:3.4'
+	compile 'postgresql:postgresql:9.1-901-1.jdbc4'
+}
+
+/*
+jar {
+    archiveName = "exporter.jar"
+
+    manifest {
+        attributes 'Main-Class': 'edu.vader.exporter.Main',
+        		   'Implementation-Title': 'exporter', 
+				   'Implementation-Version': version,
+				   'Implementation-Vendor': 'vaderlab',
+        		   'Class-Path': configurations.compile.collect { it.getName() }.join(' ')
+    }
+}
+*/
