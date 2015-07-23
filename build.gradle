@@ -16,6 +16,7 @@ dependencies {
 	compile 'log4j:log4j:1.2.17'
 	compile 'org.apache.commons:commons-lang3:3.4'
 	compile 'postgresql:postgresql:9.1-901-1.jdbc4'
+	compile 'joda-time:joda-time:2.8.1'
 }
 
 /*
