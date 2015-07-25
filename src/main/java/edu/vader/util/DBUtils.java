@@ -1,4 +1,4 @@
-package edu.vader.test;
+package edu.vader.util;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

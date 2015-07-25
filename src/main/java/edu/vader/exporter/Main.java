@@ -11,7 +11,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
-import edu.vader.test.DBUtils;
+import edu.vader.util.DBUtils;
 
 public class Main{
 	public static String dataUrl = "jdbc:postgresql://fsdb1.dtn.asu.edu:5432/temp_twitter";
