@@ -20,9 +20,9 @@ public class InsertUserMention {
 	}
 	
 	public void insert() throws SQLException{
-		String prep = "INSERT into user_mention (uid, screen_name, name, tid, tweet_uid) VALUES (" 
+		String prep = "INSERT into user_mention (uid, screen_name, name, tid) VALUES (" 
 				+ this.tid + "," + this.screen_name + "," 
-				+ this.name + "," + this.tid + "," + this.tweet_uid + ")";
+				+ this.name + "," + this.tid + ")";
 		PreparedStatement st = Main.conn.prepareStatement(prep);
 		int rowsUpdated = st.executeUpdate();
 		System.out.println(rowsUpdated + " rows inserted into user_mentions");

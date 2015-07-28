@@ -13,14 +13,15 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public class GeoHandler {
 	private GeometryFactory geomFac = new GeometryFactory();
-	public Point convertMongoGeojsonPointToPoint(Document doc){
-		@SuppressWarnings("unchecked")
-		ArrayList<Double> coordinate = (ArrayList<Double>) doc.get("coordinates");
+	@SuppressWarnings("unchecked")
+	public Point convertMongoGeojsonPointToPoint(Document locationCollectionObj){
+		ArrayList<Double> coordinate = (ArrayList<Double>) locationCollectionObj.get("coordinates");
 		return geomFac.createPoint(new Coordinate(coordinate.get(0), coordinate.get(1)));
 	}
 	
-	public Polygon convertMongoGeojsonPolygonToPolygon(Document doc){
-		ArrayList<ArrayList<ArrayList<Double>>> mongoPolys = new ArrayList<ArrayList<ArrayList<Double>>>();
+	@SuppressWarnings("unchecked")
+	public Polygon convertMongoGeojsonPolygonToPolygon(Document locationCollectionObj){
+		ArrayList<ArrayList<ArrayList<Double>>> mongoPolys = (ArrayList<ArrayList<ArrayList<Double>>>) locationCollectionObj.get("coordinates");
 		ArrayList<ArrayList<Double>> mongoPoly = mongoPolys.get(0);
 		Coordinate coordinates[] = new Coordinate[5];
 		for(int i = 0; i < mongoPoly.size(); i++){
@@ -65,6 +66,4 @@ public class GeoHandler {
 		}
 		return false;
 	}
-	
-	
 }
