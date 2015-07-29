@@ -15,7 +15,7 @@ import com.vividsolutions.jts.geom.Polygon;
 public class Convert {
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
-	private static final double INVALID_DOUBLE = -1000;
+	public static final double INVALID_COORDINATE_DOUBLE = -1000;
 	@SuppressWarnings("unchecked")
 	public void convertMongoToSql() throws SQLException{
 		Document query = new Document();
@@ -61,13 +61,14 @@ public class Convert {
 		CoordinateConverter coordinateConverter = new CoordinateConverter(doc);
 		Coordinate coordinate = coordinateConverter.getCoordinate();
 		
-	
+		double lng = Convert.INVALID_COORDINATE_DOUBLE;
+		double lat = Convert.INVALID_COORDINATE_DOUBLE;
 		if(coordinate != null){
-			longitude = coordinate.x;
-			latitude = coordinate.y;
-		}
-		//public InsertTweet(long tid, long timestamp, String tweet, String place, String language, int retweet_count, long uid, double longitude, double latitude, String original_geo_field)
-		InsertTweet insertTweet = new InsertTweet(id, timestamp, text, " ", " ", 0, " ", 0, uid);
+			lng = coordinate.x;
+			lat = coordinate.y;
+		}	
+		
+		InsertTweet insertTweet = new InsertTweet(id, timestamp, text, " ", language, retweet_count, uid, lng, lat, coordinateConverter.getOriginal_geo_field());
 		insertTweet.insert();
 		
 		Document entities = (Document) doc.get("entities");
@@ -87,7 +88,7 @@ public class Convert {
 					}
 					String mScreen_name = m.getString("screen_name");
 					String mName = m.getString("name");
-					InsertUserMention insertUserMention = new InsertUserMention(mUid, mScreen_name, mName, id, uid);
+					InsertUserMention insertUserMention = new InsertUserMention(mUid, mScreen_name, mName, id);
 					insertUserMention.insert();
 				}
 			}

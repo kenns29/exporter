@@ -60,9 +60,9 @@ public class InsertTweet {
 				+ this.language + "," 
 				+ this.retweet_count + "," 
 				+ this.uid + ","
-				+ this.longitude + ","
-				+ this.latitude + ","
-				+ this.original_geo_field + ")";
+				+ ((this.longitude != Convert.INVALID_COORDINATE_DOUBLE) ? "NULL" : this.longitude) + ","
+				+ ((this.latitude != Convert.INVALID_COORDINATE_DOUBLE) ? "NULL" : this.latitude)+ ","
+				+ ((this.original_geo_field != null) ? "NULL" : this.original_geo_field) + ")";
 		PreparedStatement st = Main.conn.prepareStatement(prep);
 		int rowsUpdated = st.executeUpdate();
 		System.out.println(rowsUpdated + " rows inserted into tweets");

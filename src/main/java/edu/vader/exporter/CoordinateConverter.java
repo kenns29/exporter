@@ -7,9 +7,16 @@ import org.bson.Document;
 import com.vividsolutions.jts.geom.Coordinate;
 
 public class CoordinateConverter {
+	private static class GeoField{
+		public static final String COORDINATE = "coordinate";
+		public static final String PLACE = "place";
+		public static final String USER_PROFILE = "user_profile";
+		public static final String TEXT = "text";
+	}
 	private static final double INVALID_DOUBLE = 0;
 	private Document doc = null;
 	private Coordinate coordinate = null;
+	private String original_geo_field = null;
 	public CoordinateConverter(Document doc){
 		this.doc = doc;
 		this.setCoordinate(this.getCoordinateFromDoc(this.doc));
@@ -18,6 +25,7 @@ public class CoordinateConverter {
 	public Coordinate getCoordinateFromDoc(Document doc){
 		Document mongoCoord = (Document) doc.get("coordinates");
 		if(mongoCoord != null){
+			setOriginal_geo_field(GeoField.COORDINATE);
 			return convertMongoCoordinateToCoordinate(mongoCoord);
 		}
 		
@@ -25,6 +33,7 @@ public class CoordinateConverter {
 		if(place != null){
 			Document placeBoundingBox = (Document) place.get("bounding_box");
 			if(placeBoundingBox != null){
+				setOriginal_geo_field(GeoField.PLACE);
 				return convertMongoPlaceBoundingBoxToCoordinate(placeBoundingBox);
 			}
 		}
@@ -66,6 +75,7 @@ public class CoordinateConverter {
 			if(geonameObj != null){
 				String from = nerDoc.getString("from");
 				if(from.equals("user.location")){
+					this.setOriginal_geo_field(GeoField.USER_PROFILE);
 					return convertGeonameToCoordinate(geonameObj);
 				}
 			}
@@ -75,6 +85,7 @@ public class CoordinateConverter {
 			Document nerDoc = ner.get(i);
 			Document geonameObj = (Document) nerDoc.get("geoname");
 			if(geonameObj != null){
+				this.setOriginal_geo_field(GeoField.TEXT);
 				return convertGeonameToCoordinate(geonameObj);
 			}
 		}
@@ -113,6 +124,14 @@ public class CoordinateConverter {
 
 	public Coordinate getCoordinate() {
 		return coordinate;
+	}
+
+	public String getOriginal_geo_field() {
+		return original_geo_field;
+	}
+
+	public void setOriginal_geo_field(String original_geo_field) {
+		this.original_geo_field = original_geo_field;
 	}
 	
 
