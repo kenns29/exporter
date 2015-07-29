@@ -9,12 +9,13 @@ import org.bson.Document;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Polygon;
 
 public class Convert {
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
-	
+	private static final double INVALID_DOUBLE = -1000;
 	@SuppressWarnings("unchecked")
 	public void convertMongoToSql() throws SQLException{
 		Document query = new Document();
@@ -55,7 +56,17 @@ public class Convert {
 		}
 		
 		long timestamp = doc.getLong("timestamp");
+		String language = doc.getString("lang");
+		int retweet_count = doc.getInteger("retweet_count", 0);
+		CoordinateConverter coordinateConverter = new CoordinateConverter(doc);
+		Coordinate coordinate = coordinateConverter.getCoordinate();
 		
+	
+		if(coordinate != null){
+			longitude = coordinate.x;
+			latitude = coordinate.y;
+		}
+		//public InsertTweet(long tid, long timestamp, String tweet, String place, String language, int retweet_count, long uid, double longitude, double latitude, String original_geo_field)
 		InsertTweet insertTweet = new InsertTweet(id, timestamp, text, " ", " ", 0, " ", 0, uid);
 		insertTweet.insert();
 		

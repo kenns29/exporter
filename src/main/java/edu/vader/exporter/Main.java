@@ -15,6 +15,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
+import edu.vader.config.ConfigProperties;
 import edu.vader.geo.GeoBoundingBox;
 import edu.vader.geo.GeoHandler;
 import edu.vader.util.DBUtils;
@@ -22,7 +23,7 @@ import edu.vader.util.DBUtils;
 public class Main{
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
-	
+	public static ConfigProperties configProperties = null;
 	public static String dataUrl = "jdbc:postgresql://fsdb1.dtn.asu.edu:5432/temp_twitter";
 	public static Properties props = new Properties();
 	public static Connection conn = null;
@@ -32,6 +33,11 @@ public class Main{
 	public static GeoHandler geoHandler = new GeoHandler();
 	public static GeoBoundingBox geoBoundingBox = null; 
 	static{
+		try {
+			configProperties = new ConfigProperties("config.properties");
+		} catch (IOException e) {
+			HIGH_PRIORITY_LOGGER.error("did not successfully load the config file.", e);
+		}
 		props.setProperty("user", "postgres");
 		try {
 			conn = DriverManager.getConnection(dataUrl, props);
@@ -44,7 +50,7 @@ public class Main{
 		try {
 			logProps.load(inputStream);
 		} catch (IOException e) {
-			HIGH_PRIORITY_LOGGER.error("Unable to load config file.", e);
+			HIGH_PRIORITY_LOGGER.error("Unable to load log config file.", e);
 		}
 		PropertyConfigurator.configure(logProps);
 		

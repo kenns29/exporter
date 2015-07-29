@@ -16,24 +16,26 @@ public class InsertTweet {
 	public String tweet = null;
 	public String place = null;
 	public String language = null;
-	public int retweet = 0;
-	public String geo = null;
+	public int retweet_count = 0;
+	double longitude = 0.0;
+	double latitude = 0.0;
 	public long time_numeric = 0;
 	public long uid = 0;
-	
-	public InsertTweet(long tid, DateTime date, String tweet, String place, String language, int retweet, String geo, long time_numeric, long uid){
+	public String original_geo_field = null;
+	public InsertTweet(long tid, DateTime date, String tweet, String place, String language, int retweet_count, long uid, double longitude, double latitude, String original_geo_field){
 		this.tid = tid;
 		this.date = date;
-		this.tweet = tweet;
+		this.tweet = escape + tweet + escape;
 		this.place = place;
 		this.language = language;
-		this.retweet = retweet;
-		this.geo = geo;
-		this.time_numeric = time_numeric;
+		this.retweet_count = retweet_count;
 		this.uid = uid;
+		this.longitude = longitude;
+		this.latitude = latitude;
+		this.original_geo_field = original_geo_field;
 	}
 	
-	public InsertTweet(long tid, long timestamp, String tweet, String place, String language, int retweet, String geo, long time_numeric, long uid){
+	public InsertTweet(long tid, long timestamp, String tweet, String place, String language, int retweet_count, long uid, double longitude, double latitude, String original_geo_field){
 		DateTime date = new DateTime(timestamp);
 		
 		this.tid = tid;
@@ -41,15 +43,26 @@ public class InsertTweet {
 		this.tweet = escape + tweet + escape;
 		this.place = place;
 		this.language = language;
-		this.retweet = retweet;
-		this.geo = geo;
-		this.time_numeric = time_numeric;
+		this.retweet_count = retweet_count;
 		this.uid = uid;
+		this.longitude = longitude;
+		this.latitude = latitude;
+		this.original_geo_field = original_geo_field;
 	}
 	
 	public void insert() throws SQLException{
 		String timestamp = "TIMESTAMP '" + convertDateTimeToTimeString(this.date) + "'";
-		String prep = "INSERT into tweet (tid, date, tweet, uid) VALUES (" + this.tid + "," + timestamp + "," + this.tweet + "," + this.uid + ")";
+		String prep = "INSERT into tweet (tid, date, tweet, place, language, retweet_count, uid, longitude, latitude, original_geo_field) VALUES (" 
+				+ this.tid + "," 
+				+ timestamp + "," 
+				+ this.tweet + "," 
+				+ this.place + "," 
+				+ this.language + "," 
+				+ this.retweet_count + "," 
+				+ this.uid + ","
+				+ this.longitude + ","
+				+ this.latitude + ","
+				+ this.original_geo_field + ")";
 		PreparedStatement st = Main.conn.prepareStatement(prep);
 		int rowsUpdated = st.executeUpdate();
 		System.out.println(rowsUpdated + " rows inserted into tweets");

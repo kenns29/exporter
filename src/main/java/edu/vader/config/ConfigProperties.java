@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class ConfigProperties {
+	public String dataScienceToolkitBaseUrl = null;
+	public String coordinate2politicsUrl = null;
 	public ConfigProperties() throws IOException{
 		this("config.properties");
 	}
@@ -29,5 +31,10 @@ public class ConfigProperties {
 		else {
 			throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
 		}
+		
+		this.dataScienceToolkitBaseUrl = prop.getProperty("dataScienceToolkitBaseUrl");
+		this.coordinate2politicsUrl = prop.getProperty("coordinate2politicsUrl");
+		
 	}
+	
 }
