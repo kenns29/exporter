@@ -3,8 +3,14 @@ package edu.vader.exporter;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.apache.log4j.Logger;
+
 public class InsertLink {
+	private static final Logger LOGGER = Logger.getLogger("reportsLog");
+	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	private static final String escape = "$verySpecialToken$";
+	
+	public static int linkCount = 0;
 	public String url = null;
 	public long tid = 0;
 	
@@ -19,6 +25,9 @@ public class InsertLink {
 				+ this.tid + ")";
 		PreparedStatement st = Main.conn.prepareStatement(prep);
 		int rowsUpdated = st.executeUpdate();
-		System.out.println(rowsUpdated + " rows inserted into tweets");
+		linkCount += rowsUpdated;
+		if(linkCount % Main.REPORT_INTERVAL == 0){
+			LOGGER.info(linkCount + " rows inserted into tweets");
+		}
 	}
 }

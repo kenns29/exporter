@@ -3,7 +3,12 @@ package edu.vader.exporter;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.apache.log4j.Logger;
+
 public class InsertUserMention {
+	private static final Logger LOGGER = Logger.getLogger("reportsLog");
+	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
+	public static int userMentionCount = 0;
 	private static final String escape = "$verySpecialToken$";
 	public long uid = 0;
 	public String screen_name = null;
@@ -25,6 +30,9 @@ public class InsertUserMention {
 				+ this.tid + ")";
 		PreparedStatement st = Main.conn.prepareStatement(prep);
 		int rowsUpdated = st.executeUpdate();
-		System.out.println(rowsUpdated + " rows inserted into user_mentions");
+		userMentionCount += rowsUpdated;
+		if(userMentionCount % Main.REPORT_INTERVAL == 0){
+			LOGGER.info(userMentionCount + " rows inserted into user_mentions");
+		}
 	}
 }

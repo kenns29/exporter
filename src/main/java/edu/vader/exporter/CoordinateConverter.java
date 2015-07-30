@@ -2,6 +2,7 @@ package edu.vader.exporter;
 
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
 import org.bson.Document;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -10,6 +11,8 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
 public class CoordinateConverter {
+	private static final Logger LOGGER = Logger.getLogger("reportsLog");
+	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	private GeometryFactory geomFac = new GeometryFactory();
 	private static class GeoField{
 		public static final String COORDINATE = "coordinate";

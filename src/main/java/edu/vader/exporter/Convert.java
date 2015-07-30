@@ -15,19 +15,31 @@ public class Convert {
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	public static final double INVALID_COORDINATE_DOUBLE = -1000;
-	public void convertMongoToSql() throws SQLException{
+	public void convertMongoToSql() throws Exception{
 		Document query = new Document();
 		this.convertMongoToSql(query);
 	}
 	
-	public void convertMongoToSql(Document query) throws SQLException{	
+	public void convertMongoToSql(ObjectId startObjectId, ObjectId endObjectId) throws Exception{
+		Document query = new Document("_id", 
+				new Document("$gt", startObjectId)
+				.append("$lte", endObjectId));
+		this.convertMongoToSql(query);
+	}
+	
+	public void convertMongoToSql(Document query) throws Exception{	
 		FindIterable<Document> iterable = Main.mongoColl.find(query).sort(new Document("_id", -1)).limit(10000);
 		MongoCursor<Document> mongoCursor = iterable.iterator();
 		
 		try{
 			while(mongoCursor.hasNext()){
 				Document doc = mongoCursor.next();
-				convertOneDoc(doc);
+				try{
+					convertOneDoc(doc);
+				}
+				catch(Exception e){
+					HIGH_PRIORITY_LOGGER.error("Document " + doc.getObjectId("_id") + " caused an error.", e);
+				}
 			}
 		}
 		finally{
@@ -35,12 +47,7 @@ public class Convert {
 		}
 	}
 	
-	public void convertMongoToSql(ObjectId startObjectId, ObjectId endObjectId) throws SQLException{
-		Document query = new Document("_id", 
-				new Document("$gt", startObjectId)
-				.append("$lte", endObjectId));
-		this.convertMongoToSql(query);
-	}
+	
 	
 	@SuppressWarnings("unchecked")
 	private void convertOneDoc(Document doc) throws SQLException{

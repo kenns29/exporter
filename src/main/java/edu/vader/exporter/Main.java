@@ -26,6 +26,7 @@ import edu.vader.util.TimeUtils;
 public class Main{
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
+	public static final int REPORT_INTERVAL = 50;
 	public static ConfigProperties configProperties = null;
 	public static Properties props = new Properties();
 	public static Connection conn = null;
@@ -70,32 +71,12 @@ public class Main{
 	
 	public static void main(String args[]) throws SQLException{
 		DBUtils.deleteAll();
-		Convert convert = new Convert();
-		Communicate communicate = new Communicate();
-		
-		ObjectId startObjectId = Main.configProperties.startObjectId;
-		ObjectId endObjectId = Main.configProperties.endObjectId;
-		startObjectId = TimeUtils.decrementObjectId(startObjectId);
-		ObjectId safestObjectId = null;
-		while(safestObjectId == null){	
-			try {
-				safestObjectId = communicate.getSafestIdFromNer();
-			} catch (IOException e) {
-				HIGH_PRIORITY_LOGGER.error("can not get the safest id from ner", e);
-			}
+		Run run = new Run();
+		if(Main.configProperties.stopAtEnd){
+			run.convertWithStartEndObjectId();
 		}
-		
-		while(true){
-			try {
-				safestObjectId = communicate.getSafestIdFromNer();
-			} catch (IOException e) {
-				HIGH_PRIORITY_LOGGER.error("can not get the safest id from ner", e);
-				continue;
-			}
-			if(startObjectId.compareTo(safestObjectId) != 0){
-				convert.convertMongoToSql(startObjectId, safestObjectId);
-			}
-			startObjectId = safestObjectId;
+		else{
+			run.convertWithSafestObjectId();
 		}
 	}
 }

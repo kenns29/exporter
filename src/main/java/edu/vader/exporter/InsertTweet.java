@@ -3,14 +3,17 @@ package edu.vader.exporter;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 public class InsertTweet {
+	private static final Logger LOGGER = Logger.getLogger("reportsLog");
+	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	private static final String escape = "$verySpecialToken$";
-	
+	public static int tweetCount = 0;
 	public long tid = 0;
 	public DateTime date = null;
 	public String tweet = null;
@@ -65,7 +68,10 @@ public class InsertTweet {
 				+ ((this.original_geo_field != null) ? this.original_geo_field : "NULL") + ")";
 		PreparedStatement st = Main.conn.prepareStatement(prep);
 		int rowsUpdated = st.executeUpdate();
-		System.out.println(rowsUpdated + " rows inserted into tweets");
+		tweetCount += rowsUpdated;
+		if(tweetCount % Main.REPORT_INTERVAL == 0){
+			LOGGER.info(tweetCount + " rows inserted into tweets");
+		}
 	}
 	
 	private String convertDateTimeToTimeString(DateTime date){

@@ -3,9 +3,13 @@ package edu.vader.exporter;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.apache.log4j.Logger;
+
 public class InsertHashtag {
+	private static final Logger LOGGER = Logger.getLogger("reportsLog");
+	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	private static final String escape = "$verySpecialToken$";
-	
+	public static int hashtagCount = 0;
 	public long tid = 0;
 	public String hashtag = null;
 	
@@ -19,6 +23,9 @@ public class InsertHashtag {
 				+ this.tid + "," + this.hashtag + ")";
 		PreparedStatement st = Main.conn.prepareStatement(prep);
 		int rowsUpdated = st.executeUpdate();
-		System.out.println(rowsUpdated + " rows inserted into hashtag");
+		hashtagCount += rowsUpdated;
+		if(hashtagCount % Main.REPORT_INTERVAL == 0){
+			LOGGER.info(hashtagCount + " rows inserted into hashtag");
+		}
 	}
 }
