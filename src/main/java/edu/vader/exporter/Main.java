@@ -70,20 +70,32 @@ public class Main{
 	
 	public static void main(String args[]) throws SQLException{
 		DBUtils.deleteAll();
+		Convert convert = new Convert();
+		Communicate communicate = new Communicate();
+		
 		ObjectId startObjectId = Main.configProperties.startObjectId;
 		ObjectId endObjectId = Main.configProperties.endObjectId;
-		
+		startObjectId = TimeUtils.decrementObjectId(startObjectId);
 		ObjectId safestObjectId = null;
-		Communicate communicate = new Communicate();
-		try {
-			safestObjectId = communicate.getSafestIdFromNer();
-		} catch (IOException e) {
-			HIGH_PRIORITY_LOGGER.error("can not get the safest id from ner", e);
+		while(safestObjectId == null){	
+			try {
+				safestObjectId = communicate.getSafestIdFromNer();
+			} catch (IOException e) {
+				HIGH_PRIORITY_LOGGER.error("can not get the safest id from ner", e);
+			}
 		}
 		
-		startObjectId = TimeUtils.decrementObjectId(startObjectId);
-		
-		Convert convert = new Convert();
-		convert.convertMongoToSql();
+		while(true){
+			try {
+				safestObjectId = communicate.getSafestIdFromNer();
+			} catch (IOException e) {
+				HIGH_PRIORITY_LOGGER.error("can not get the safest id from ner", e);
+				continue;
+			}
+			if(startObjectId.compareTo(safestObjectId) != 0){
+				convert.convertMongoToSql(startObjectId, safestObjectId);
+			}
+			startObjectId = safestObjectId;
+		}
 	}
 }
