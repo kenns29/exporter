@@ -39,4 +39,31 @@ public class MongoUtils {
 		}
 		return null;
 	}
+	
+	public static int getDocumentCount(MongoCollection<Document> coll, ObjectId startObjectId, ObjectId endObjectId){
+		if(startObjectId != null && endObjectId != null){
+			Document query = new Document("_id", 
+					new Document("$gt", startObjectId)
+						.append("$lte", endObjectId));
+			return (int) coll.count(query);
+		}
+		else{
+			return (int) coll.count();
+		}
+		
+	}
+	public static int getTotalDocumentCount(MongoCollection<Document> coll, ObjectId startObjectId){
+		if(startObjectId != null){
+			Document query = new Document("_id", 
+					new Document("$gt", startObjectId));
+			
+			return (int) coll.count(query);
+		}
+		else{
+			return (int) coll.count();
+		}
+	}
+	public static int getTotalDocumentCountWithStopAtEnd(MongoCollection<Document> coll){
+		return getDocumentCount(coll, Main.currentObejctId, Main.configProperties.endObjectId);
+	}
 }

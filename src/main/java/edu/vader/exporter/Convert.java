@@ -36,6 +36,18 @@ public class Convert {
 				Document doc = mongoCursor.next();
 				try{
 					convertOneDoc(doc);
+					Main.currentObejctId = doc.getObjectId("_id");
+					++Main.documentCount;
+					++Main.minuteDocCount;
+					if(Main.documentCount % Main.DOCUMENT_REPORT_INTERVAL == 0){
+						LOGGER.info(Main.documentCount + " documents have been processed, current object id is " + Main.currentObejctId);
+					}
+					long currentTime = System.currentTimeMillis();
+					if(currentTime - Main.preStartTime >= 60000){
+						Main.lastMinuteDocCount = Main.minuteDocCount;
+						Main.minuteDocCount = 0;
+						Main.preStartTime = currentTime;
+					}
 				}
 				catch(Exception e){
 					HIGH_PRIORITY_LOGGER.error("Document " + doc.getObjectId("_id") + " caused an error.", e);

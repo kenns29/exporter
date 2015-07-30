@@ -9,7 +9,6 @@ import java.util.Properties;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import com.mongodb.DBCollection;
 import com.mongodb.client.MongoCollection;
 
 import edu.vader.util.MongoUtils;
@@ -33,7 +32,7 @@ public class ConfigProperties {
 	public ObjectId startObjectId = null;
 	public ObjectId endObjectId = null;
 	public boolean stopAtEnd = false;
-	
+	public int simpleRestletServerPort = 0;
 	public ConfigProperties() throws IOException{
 		this("config.properties");
 	}
@@ -82,6 +81,7 @@ public class ConfigProperties {
 		}
 		
 		this.stopAtEnd = Boolean.parseBoolean(prop.getProperty("stopAtEnd"));
+		this.simpleRestletServerPort = Integer.valueOf(prop.getProperty("simpleRestletServerPort"));
 	}
 	
 	public void initStartEnd(MongoCollection<Document> coll){

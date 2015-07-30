@@ -1,8 +1,5 @@
 package edu.vader.exporter;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
 import org.apache.log4j.Logger;
 import org.bson.types.ObjectId;
 
@@ -18,14 +15,15 @@ public class Run {
 		
 	}
 	public void convertWithSafestObjectId(){
+		boolean firstStart = true;
 		ObjectId startObjectId = Main.configProperties.startObjectId;
 		startObjectId = TimeUtils.decrementObjectId(startObjectId);
-		ObjectId safestObjectId = null;
+		Main.currentSafestObjectId = null;
 		while(true){
 			try {
-				safestObjectId = communicate.getSafestIdFromNer();
-			} catch (IOException e) {
-				HIGH_PRIORITY_LOGGER.error("can not get the safest id from ner", e);
+				Main.currentSafestObjectId = communicate.getSafestIdFromNer();
+			} catch (Exception e) {
+				LOGGER.error("can not get the safest id from ner, waiting to retrive it again", e);
 				try {
 					Thread.sleep(300000);
 				} catch (InterruptedException e1) {
@@ -33,8 +31,8 @@ public class Run {
 				}
 				continue;
 			}
-			LOGGER.info("Safest Object Id is " + safestObjectId);
-			if(safestObjectId == null){
+			LOGGER.info("Safest Object Id is " + Main.currentSafestObjectId);
+			if(Main.currentSafestObjectId == null){
 				try {
 					Thread.sleep(10000);
 				} catch (InterruptedException e) {
@@ -42,28 +40,36 @@ public class Run {
 				}
 				continue;
 			}
-			if(startObjectId.compareTo(safestObjectId) != 0){
-				LOGGER.info("Running the convertion for " + startObjectId + " to " + safestObjectId);
-				try {
-					convert.convertMongoToSql(startObjectId, safestObjectId);
-				} catch (Exception e) {
-					HIGH_PRIORITY_LOGGER.fatal("the range " + startObjectId + " to " + safestObjectId + " was not fully processed. Due to error ", e);
+			if(startObjectId.compareTo(Main.currentSafestObjectId) != 0){
+				if(firstStart){
+					Main.mainStartTime = System.currentTimeMillis();
+					Main.preStartTime = System.currentTimeMillis();
 				}
-				LOGGER.info("Finished the convertion for " + startObjectId + " to " + safestObjectId);
+				firstStart = false;
+				LOGGER.info("Running the convertion for " + startObjectId + " to " + Main.currentSafestObjectId);
+				try {
+					convert.convertMongoToSql(startObjectId, Main.currentSafestObjectId);
+				} catch (Exception e) {
+					HIGH_PRIORITY_LOGGER.fatal("the range " + startObjectId + " to " + Main.currentSafestObjectId + " was not fully processed. Due to error ", e);
+				}
+				LOGGER.info("Finished the convertion for " + startObjectId + " to " + Main.currentSafestObjectId);
 			}
 			else{
 				try {
+					LOGGER.info("reached the end of the current safest id, waiting");
 					Thread.sleep(10000);
 				} catch (InterruptedException e) {
 					HIGH_PRIORITY_LOGGER.error("Interrupted while sleep.", e);
 				}
 			}
-			startObjectId = safestObjectId;
+			startObjectId = Main.currentSafestObjectId;
 		}
 	}
 	public void convertWithStartEndObjectId(){
 		ObjectId startObjectId = Main.configProperties.startObjectId;
 		ObjectId endObjectId = Main.configProperties.endObjectId;
+		Main.mainStartTime = System.currentTimeMillis();
+		Main.preStartTime = System.currentTimeMillis();
 		try {
 			convert.convertMongoToSql(startObjectId, endObjectId);
 		} catch (Exception e) {

@@ -16,12 +16,11 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
-import edu.vader.communicate.Communicate;
 import edu.vader.config.ConfigProperties;
 import edu.vader.geo.GeoBoundingBox;
 import edu.vader.geo.GeoHandler;
+import edu.vader.simpleRestletServer.EmbeddedServerComponent;
 import edu.vader.util.DBUtils;
-import edu.vader.util.TimeUtils;
 
 public class Main{
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
@@ -35,6 +34,16 @@ public class Main{
 	public static MongoCollection<Document> mongoColl = null; 
 	public static GeoHandler geoHandler = new GeoHandler();
 	public static GeoBoundingBox geoBoundingBox = null; 
+	
+	public static ObjectId currentObejctId = null;
+	public static ObjectId currentSafestObjectId = null;
+	public static int documentCount = 0;
+	public static final int DOCUMENT_REPORT_INTERVAL = 50;
+	
+	public static long mainStartTime = 0;
+	public static long preStartTime = 0;
+	public static int minuteDocCount = 0;
+	public static int lastMinuteDocCount = 0;
 	static{
 		try {
 			configProperties = new ConfigProperties("config.properties");
@@ -69,8 +78,10 @@ public class Main{
 		configProperties.initStartEnd(mongoColl);
 	}
 	
-	public static void main(String args[]) throws SQLException{
+	public static void main(String args[]) throws Exception{
 		DBUtils.deleteAll();
+		EmbeddedServerComponent server = new EmbeddedServerComponent(Main.configProperties.simpleRestletServerPort);
+		server.start();
 		Run run = new Run();
 		if(Main.configProperties.stopAtEnd){
 			run.convertWithStartEndObjectId();
