@@ -10,6 +10,13 @@ apply plugin: 'application'
 mainClassName = "edu.vader.exporter.Main"
 archivesBaseName = 'exporter'
 
+version = {->
+    def lines = file('src/main/java/edu/vader/exporter/Main.java').readLines();
+    def extract = {name ->
+        lines.grep {it =~ /public static final int $name =/}[0].replaceFirst(/.*=\s*(\d+);.*/, '$1')
+    }
+    extract('VERSION_MAJOR') + '.' + extract('VERSION_MINOR') + '.' + extract('BUILD_ID')
+}()
 
 dependencies {
 	compile 'org.mongodb:mongo-java-driver:3.0.2'
@@ -24,7 +31,19 @@ dependencies {
     compile 'org.restlet.jse:org.restlet.ext.slf4j:2.3.+'
 }
 
-/*
+distZip {
+    into(project.name + '-' + version) {
+        from '.'
+        include 'config.properties'
+    }
+}
+distTar {
+    into(project.name + '-' + version) {
+        from '.'
+        include 'config.properties'
+    }
+}
+
 jar {
     archiveName = "exporter.jar"
 
@@ -36,4 +55,3 @@ jar {
         		   'Class-Path': configurations.compile.collect { it.getName() }.join(' ')
     }
 }
-*/
