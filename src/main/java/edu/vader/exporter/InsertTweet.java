@@ -26,13 +26,13 @@ public class InsertTweet {
 		this.tid = tid;
 		this.date = date;
 		this.tweet = escape + tweet + escape;
-		this.place = place;
-		this.language = language;
+		this.place = escape + place + escape;
+		this.language = escape + language + escape;
 		this.retweet_count = retweet_count;
 		this.uid = uid;
 		this.longitude = longitude;
 		this.latitude = latitude;
-		this.original_geo_field = original_geo_field;
+		this.original_geo_field = escape + original_geo_field + escape;
 	}
 	
 	public InsertTweet(long tid, long timestamp, String tweet, String place, String language, int retweet_count, long uid, double longitude, double latitude, String original_geo_field){
@@ -41,13 +41,13 @@ public class InsertTweet {
 		this.tid = tid;
 		this.date = date;
 		this.tweet = escape + tweet + escape;
-		this.place = place;
-		this.language = language;
+		this.place = escape + place + escape;
+		this.language = escape + language + escape;
 		this.retweet_count = retweet_count;
 		this.uid = uid;
 		this.longitude = longitude;
 		this.latitude = latitude;
-		this.original_geo_field = original_geo_field;
+		this.original_geo_field = escape + original_geo_field + escape;
 	}
 	
 	public void insert() throws SQLException{
@@ -60,9 +60,9 @@ public class InsertTweet {
 				+ this.language + "," 
 				+ this.retweet_count + "," 
 				+ this.uid + ","
-				+ ((this.longitude != Convert.INVALID_COORDINATE_DOUBLE) ? "NULL" : this.longitude) + ","
-				+ ((this.latitude != Convert.INVALID_COORDINATE_DOUBLE) ? "NULL" : this.latitude)+ ","
-				+ ((this.original_geo_field != null) ? "NULL" : this.original_geo_field) + ")";
+				+ ((this.longitude != Convert.INVALID_COORDINATE_DOUBLE) ? this.longitude : "NULL") + ","
+				+ ((this.latitude != Convert.INVALID_COORDINATE_DOUBLE) ?  this.latitude : "NULL")+ ","
+				+ ((this.original_geo_field != null) ? this.original_geo_field : "NULL") + ")";
 		PreparedStatement st = Main.conn.prepareStatement(prep);
 		int rowsUpdated = st.executeUpdate();
 		System.out.println(rowsUpdated + " rows inserted into tweets");

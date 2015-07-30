@@ -14,7 +14,7 @@ public class InsertLink {
 	}
 	
 	public void insert() throws SQLException{
-		String prep = "INSERT into tweet (url, tid) VALUES (" 
+		String prep = "INSERT into link (url, tid) VALUES (" 
 				+ this.url + "," 
 				+ this.tid + ")";
 		PreparedStatement st = Main.conn.prepareStatement(prep);

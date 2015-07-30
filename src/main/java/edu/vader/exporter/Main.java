@@ -10,26 +10,28 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
+import edu.vader.communicate.Communicate;
 import edu.vader.config.ConfigProperties;
 import edu.vader.geo.GeoBoundingBox;
 import edu.vader.geo.GeoHandler;
 import edu.vader.util.DBUtils;
+import edu.vader.util.TimeUtils;
 
 public class Main{
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	public static ConfigProperties configProperties = null;
-	public static String dataUrl = "jdbc:postgresql://fsdb1.dtn.asu.edu:5432/temp_twitter";
 	public static Properties props = new Properties();
 	public static Connection conn = null;
-	public static MongoClient mongoClient = new MongoClient("fsdb2.dtn.asu.edu");
-	public static MongoDatabase mongoDatabase = mongoClient.getDatabase("tweettracker");
-	public static MongoCollection<Document> mongoColl = mongoDatabase.getCollection("tweets");
+	public static MongoClient mongoClient = null;
+	public static MongoDatabase mongoDatabase = null; 
+	public static MongoCollection<Document> mongoColl = null; 
 	public static GeoHandler geoHandler = new GeoHandler();
 	public static GeoBoundingBox geoBoundingBox = null; 
 	static{
@@ -38,13 +40,16 @@ public class Main{
 		} catch (IOException e) {
 			HIGH_PRIORITY_LOGGER.error("did not successfully load the config file.", e);
 		}
-		props.setProperty("user", "postgres");
+		props.setProperty("user", Main.configProperties.postgresqlUser);
 		try {
-			conn = DriverManager.getConnection(dataUrl, props);
+			conn = DriverManager.getConnection(Main.configProperties.postgresqlDataUrl, props);
 		} catch (SQLException e) {
 			HIGH_PRIORITY_LOGGER.error("could not connect to postgres.", e);
 		}
 		
+		mongoClient = new MongoClient(Main.configProperties.inputDataHost, Main.configProperties.inputDataPort);
+		mongoDatabase = mongoClient.getDatabase(Main.configProperties.inputDataDB);
+		mongoColl = mongoDatabase.getCollection(Main.configProperties.inputDataColl);
 		Properties logProps = new Properties();
 		InputStream inputStream = Main.class.getClassLoader().getResourceAsStream("log4j.properties");
 		try {
@@ -59,10 +64,25 @@ public class Main{
 		} catch (IOException e) {
 			HIGH_PRIORITY_LOGGER.error("can not load the bounding box", e);
 		}
+		
+		configProperties.initStartEnd(mongoColl);
 	}
 	
-	public static void main(String args[]) throws SQLException{	
+	public static void main(String args[]) throws SQLException{
 		DBUtils.deleteAll();
+		ObjectId startObjectId = Main.configProperties.startObjectId;
+		ObjectId endObjectId = Main.configProperties.endObjectId;
+		
+		ObjectId safestObjectId = null;
+		Communicate communicate = new Communicate();
+		try {
+			safestObjectId = communicate.getSafestIdFromNer();
+		} catch (IOException e) {
+			HIGH_PRIORITY_LOGGER.error("can not get the safest id from ner", e);
+		}
+		
+		startObjectId = TimeUtils.decrementObjectId(startObjectId);
+		
 		Convert convert = new Convert();
 		convert.convertMongoToSql();
 	}

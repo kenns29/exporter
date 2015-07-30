@@ -6,9 +6,34 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.bson.Document;
+import org.bson.types.ObjectId;
+
+import com.mongodb.DBCollection;
+import com.mongodb.client.MongoCollection;
+
+import edu.vader.util.MongoUtils;
+
 public class ConfigProperties {
+	public String postgresqlDataUrl = null;
+	public String postgresqlUser = null;
+	
+	public String inputDataHost = null;
+	public int inputDataPort = 0;
+	public String inputDataDB = null;
+	public String inputDataColl = null;
+	
 	public String dataScienceToolkitBaseUrl = null;
 	public String coordinate2politicsUrl = null;
+	
+	public String nerProgramBaseUrl = null;
+	public String safestObjectIdUrl = null;
+	
+	public boolean useObjectIdLimit = false;
+	public ObjectId startObjectId = null;
+	public ObjectId endObjectId = null;
+	public boolean stopAtEnd = false;
+	
 	public ConfigProperties() throws IOException{
 		this("config.properties");
 	}
@@ -35,6 +60,37 @@ public class ConfigProperties {
 		this.dataScienceToolkitBaseUrl = prop.getProperty("dataScienceToolkitBaseUrl");
 		this.coordinate2politicsUrl = prop.getProperty("coordinate2politicsUrl");
 		
+		this.postgresqlDataUrl = prop.getProperty("postgresqlDataUrl");
+		this.postgresqlUser = prop.getProperty("postgresqlUser");
+		
+		this.inputDataHost = prop.getProperty("inputDataHost");
+		this.inputDataPort = Integer.valueOf(prop.getProperty("inputDataPort"));
+		this.inputDataDB = prop.getProperty("inputDataDB");
+		this.inputDataColl = prop.getProperty("inputDataColl");
+		
+		this.nerProgramBaseUrl = prop.getProperty("nerProgramBaseUrl");
+		this.safestObjectIdUrl = prop.getProperty("safestObjectIdUrl");
+		
+		this.useObjectIdLimit = Boolean.parseBoolean(prop.getProperty("useObjectIdLimit"));
+		String startObjectIdStr = prop.getProperty("startObjectId");
+		String endObjectIdStr = prop.getProperty("endObjectId");
+		if(!startObjectIdStr.equals("none")){
+			startObjectId = new ObjectId(startObjectIdStr);
+		}
+		if(!endObjectIdStr.equals("none")){
+			endObjectId = new ObjectId(endObjectIdStr);
+		}
+		
+		this.stopAtEnd = Boolean.parseBoolean(prop.getProperty("stopAtEnd"));
+	}
+	
+	public void initStartEnd(MongoCollection<Document> coll){
+		if(startObjectId == null){
+			startObjectId = MongoUtils.minObjectId(coll);
+		}
+		if(endObjectId == null){
+			endObjectId = MongoUtils.maxObjectId(coll);
+		}
 	}
 	
 }

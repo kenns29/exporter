@@ -17,7 +17,7 @@ public class InsertRetweet {
 	}
 	
 	public void insert() throws SQLException{
-		String prep = "INSERT into tweet (tid, screen_name_from, screen_name_to) VALUES (" 
+		String prep = "INSERT into retweet (tid, screen_name_from, screen_name_to) VALUES (" 
 				+ this.tid + "," 
 				+ this.screen_name_from + ","
 				+ this.screen_name_to + ")";

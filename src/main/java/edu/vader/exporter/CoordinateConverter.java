@@ -5,8 +5,12 @@ import java.util.ArrayList;
 import org.bson.Document;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 
 public class CoordinateConverter {
+	private GeometryFactory geomFac = new GeometryFactory();
 	private static class GeoField{
 		public static final String COORDINATE = "coordinate";
 		public static final String PLACE = "place";
@@ -17,24 +21,43 @@ public class CoordinateConverter {
 	private Document doc = null;
 	private Coordinate coordinate = null;
 	private String original_geo_field = null;
+	private boolean isWithinBoundingBox = false;
 	public CoordinateConverter(Document doc){
 		this.doc = doc;
 		this.setCoordinate(this.getCoordinateFromDoc(this.doc));
+		this.setWithinBoundingBox(this.hasIntersection(this.coordinate, Main.geoBoundingBox.getBoundingBox()));
 	}
 	
+	public boolean hasIntersection(Coordinate coordinate, Geometry boundingBox){
+		Point point = geomFac.createPoint(coordinate);
+		if(point.intersects(boundingBox)){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
 	public Coordinate getCoordinateFromDoc(Document doc){
 		Document mongoCoord = (Document) doc.get("coordinates");
 		if(mongoCoord != null){
-			setOriginal_geo_field(GeoField.COORDINATE);
-			return convertMongoCoordinateToCoordinate(mongoCoord);
+			Coordinate coordinate = convertMongoCoordinateToCoordinate(mongoCoord);
+			Point point = geomFac.createPoint(coordinate);
+			if(point.intersects(Main.geoBoundingBox.getBoundingBox())){
+				setOriginal_geo_field(GeoField.COORDINATE);
+				return coordinate;
+			}
 		}
 		
 		Document place = (Document) doc.get("place");
 		if(place != null){
 			Document placeBoundingBox = (Document) place.get("bounding_box");
 			if(placeBoundingBox != null){
-				setOriginal_geo_field(GeoField.PLACE);
-				return convertMongoPlaceBoundingBoxToCoordinate(placeBoundingBox);
+				Coordinate coordinate = convertMongoPlaceBoundingBoxToCoordinate(placeBoundingBox);
+				Point point = geomFac.createPoint(coordinate);
+				if(point.intersects(Main.geoBoundingBox.getBoundingBox())){
+					setOriginal_geo_field(GeoField.PLACE);
+					return coordinate; 
+				}
 			}
 		}
 		@SuppressWarnings("unchecked")
@@ -74,9 +97,13 @@ public class CoordinateConverter {
 			Document geonameObj = (Document) nerDoc.get("geoname");
 			if(geonameObj != null){
 				String from = nerDoc.getString("from");
-				if(from.equals("user.location")){
-					this.setOriginal_geo_field(GeoField.USER_PROFILE);
-					return convertGeonameToCoordinate(geonameObj);
+				if(from.equals("user.location")){	
+					Coordinate coordinate = convertGeonameToCoordinate(geonameObj);
+					Point point = geomFac.createPoint(coordinate);
+					if(point.intersects(Main.geoBoundingBox.getBoundingBox())){
+						this.setOriginal_geo_field(GeoField.USER_PROFILE);
+						return coordinate;
+					}
 				}
 			}
 		}
@@ -85,8 +112,12 @@ public class CoordinateConverter {
 			Document nerDoc = ner.get(i);
 			Document geonameObj = (Document) nerDoc.get("geoname");
 			if(geonameObj != null){
-				this.setOriginal_geo_field(GeoField.TEXT);
-				return convertGeonameToCoordinate(geonameObj);
+				Coordinate coordinate = convertGeonameToCoordinate(geonameObj);
+				Point point = geomFac.createPoint(coordinate);
+				if(point.intersects(Main.geoBoundingBox.getBoundingBox())){
+					this.setOriginal_geo_field(GeoField.TEXT);
+					return coordinate;
+				}
 			}
 		}
 		
@@ -132,6 +163,14 @@ public class CoordinateConverter {
 
 	public void setOriginal_geo_field(String original_geo_field) {
 		this.original_geo_field = original_geo_field;
+	}
+
+	public boolean isWithinBoundingBox() {
+		return isWithinBoundingBox;
+	}
+
+	public void setWithinBoundingBox(boolean isWithinBoundingBox) {
+		this.isWithinBoundingBox = isWithinBoundingBox;
 	}
 	
 
