@@ -53,7 +53,7 @@ public class InsertTweet {
 		this.original_geo_field = escape + original_geo_field + escape;
 	}
 	
-	public void insert() throws SQLException{
+	private int insert() throws SQLException{
 		String timestamp = "TIMESTAMP '" + convertDateTimeToTimeString(this.date) + "'";
 		String prep = "INSERT into tweet (tid, date, tweet, place, language, retweet_count, uid, longitude, latitude, original_geo_field) VALUES (" 
 				+ this.tid + "," 
@@ -68,12 +68,60 @@ public class InsertTweet {
 				+ ((this.original_geo_field != null) ? this.original_geo_field : "NULL") + ")";
 		PreparedStatement st = Main.conn.prepareStatement(prep);
 		int rowsUpdated = st.executeUpdate();
+		return rowsUpdated;
+	}
+	
+	private int update() throws Exception{
+		String timestamp = "TIMESTAMP '" + convertDateTimeToTimeString(this.date) + "'";
+		String prep = "UPDATE tweet SET"
+				+ " date = " + timestamp + ","
+				+ " tweet = " + this.tweet + ","
+				+ " place = " + ((this.place != null) ? this.place : "NULL") + ","
+				+ " language = " + this.language + ","
+				+ " retweet_count = " + this.retweet_count + ","
+				+ " uid = " + this.uid + ","
+				+ " longitude = " + ((this.longitude != Convert.INVALID_COORDINATE_DOUBLE) ? this.longitude : "NULL") + ","
+				+ " latitude = " + ((this.latitude != Convert.INVALID_COORDINATE_DOUBLE) ?  this.latitude : "NULL")+ ","
+				+ " original_geo_field = " + ((this.original_geo_field != null) ? this.original_geo_field : "NULL") 
+				+ " WHERE tid = " + this.tid;
+		PreparedStatement st = Main.conn.prepareStatement(prep);
+		int rowsUpdated = st.executeUpdate();
+		return rowsUpdated;
+	}
+	
+	private int insertOrReplace(){
+		while(true){
+			int rowsUpdated = 0;
+			try {
+				rowsUpdated = update();
+			} catch (Exception e) {
+				LOGGER.error("did not successfully update " + tid, e);
+			}
+			if(rowsUpdated > 0){
+				return rowsUpdated;
+			}
+			else {
+				
+				try {
+					rowsUpdated = insert();
+					return rowsUpdated;
+				} catch (Exception e) {
+					LOGGER.error("did not succesfully insert " + tid + ", retry updating again.", e);
+				}
+			}
+		}
+		
+	}
+	
+	public int insertOrReplaceWithReport(){
+		int rowsUpdated = insertOrReplace();
 		tweetCount += rowsUpdated;
 		if(tweetCount % Main.configProperties.insertionReportInterval == 0){
 			LOGGER.info(tweetCount + " rows inserted into tweets");
 		}
+		return rowsUpdated;
+		
 	}
-	
 	private String convertDateTimeToTimeString(DateTime date){
 		DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss z").withZone(DateTimeZone.UTC);
 		return fmt.print(date);
