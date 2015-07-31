@@ -15,7 +15,6 @@ import org.bson.types.ObjectId;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-
 import edu.vader.config.ConfigProperties;
 import edu.vader.geo.GeoBoundingBox;
 import edu.vader.geo.GeoHandler;
@@ -89,6 +88,7 @@ public class Main{
 	
 	public static void main(String args[]) throws Exception{
 		DBUtils.deleteAll();
+
 		EmbeddedServerComponent server = new EmbeddedServerComponent(Main.configProperties.simpleRestletServerPort);
 		server.start();
 		Run run = new Run();

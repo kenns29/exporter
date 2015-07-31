@@ -17,9 +17,14 @@ public class Connection {
 	public URL url = null;
 	public HttpURLConnection httpURLConnection = null;
 
-	public Connection() {
+	public Connection(){}
+	public Connection(String urlStr) {
+		initConnection(urlStr);
+	}
+	
+	public void initConnection(String urlStr){
 		try {
-			url = new URL(Main.configProperties.nerProgramBaseUrl + Main.configProperties.safestObjectIdUrl);
+			url = new URL(urlStr);
 			try {
 				httpURLConnection = (HttpURLConnection) url.openConnection();
 				httpURLConnection.setRequestMethod("GET");
@@ -33,9 +38,8 @@ public class Connection {
 			HIGH_PRIORITY_LOGGER.error("Ner program url is not properly formed.", e);
 		}
 	}
-	
 	public String getResponse() throws IOException{
-		String response = "{}";
+		String response = null;
 		if(this.httpURLConnection != null){
 			InputStream is = this.httpURLConnection.getInputStream();
 			response = Utils.readFromInputStreamByLine(is);
