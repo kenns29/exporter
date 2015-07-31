@@ -40,11 +40,10 @@ public class Geocoding {
 					JsonObject politicObject = politicsArray.get(0).getAsJsonObject();
 					for(int i = 1; i < politicsArray.size(); i++){
 						JsonObject politicObject1 = politicsArray.get(i).getAsJsonObject();
-						if(compareLocationObject(politicObject, politicObject1) > 0){
+						if(compareLocationObject(politicObject, politicObject1) < 0){
 							politicObject = politicObject1;
 						}
 					}
-					
 					return politicObject.get("name").getAsString();
 				}
 				
@@ -73,8 +72,8 @@ public class Geocoding {
 			return type1.compareTo(type2);
 		}
 		else{
-			String numStr1 = type1.replace("[^0-9]", "");
-			String numStr2 = type2.replace("[^0-9]", "");
+			String numStr1 = type1.replaceAll("[^0-9]", "");
+			String numStr2 = type2.replaceAll("[^0-9]", "");
 			int num1 = Integer.valueOf(numStr1).intValue();
 			int num2 = Integer.valueOf(numStr2).intValue();
 			return num1 - num2;
