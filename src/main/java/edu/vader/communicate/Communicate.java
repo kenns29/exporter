@@ -21,7 +21,6 @@ public class Communicate {
 		connection.disconnect();
 		if(response != null){
 			JsonObject jsonObject = new JsonParser().parse(response).getAsJsonObject();
-			System.out.println("jsonObject = " + jsonObject.toString());
 			JsonElement objId = jsonObject.get("safestObjectId");
 			if(!objId.isJsonNull()){
 				String objIdStr = objId.getAsString();
