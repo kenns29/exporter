@@ -11,6 +11,8 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import com.vividsolutions.jts.geom.Coordinate;
 
+import edu.vader.geocode.Geocoding;
+
 public class Convert {
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
@@ -28,7 +30,7 @@ public class Convert {
 	}
 	
 	public void convertMongoToSql(Document query) throws Exception{	
-		FindIterable<Document> iterable = Main.mongoColl.find(query).sort(new Document("_id", -1)).limit(10000);
+		FindIterable<Document> iterable = Main.mongoColl.find(query).sort(new Document("_id", 1));
 		MongoCursor<Document> mongoCursor = iterable.iterator();
 		
 		try{
@@ -85,11 +87,18 @@ public class Convert {
 			
 			double lng = Convert.INVALID_COORDINATE_DOUBLE;
 			double lat = Convert.INVALID_COORDINATE_DOUBLE;
+			String place = null;
 			if(coordinate != null){
 				lng = coordinate.x;
 				lat = coordinate.y;
+				Geocoding geocoding = new Geocoding();
+				try {
+					place = geocoding.reverseLookUp(coordinate);
+				} catch (Exception e) {
+					HIGH_PRIORITY_LOGGER.error("Geocoding did not complete successfually, document with the error is tweet " + id + ". and the object id is " + doc.getObjectId("_id"));
+				}
 			}
-			InsertTweet insertTweet = new InsertTweet(id, timestamp, text, " ", language, retweet_count, uid, lng, lat, coordinateConverter.getOriginal_geo_field());
+			InsertTweet insertTweet = new InsertTweet(id, timestamp, text, place , language, retweet_count, uid, lng, lat, coordinateConverter.getOriginal_geo_field());
 			insertTweet.insert();
 			
 			Document entities = (Document) doc.get("entities");

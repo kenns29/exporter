@@ -59,7 +59,7 @@ public class InsertTweet {
 				+ this.tid + "," 
 				+ timestamp + "," 
 				+ this.tweet + "," 
-				+ this.place + "," 
+				+ ((this.place != null) ? this.place : "NULL") + "," 
 				+ this.language + "," 
 				+ this.retweet_count + "," 
 				+ this.uid + ","
