@@ -12,8 +12,7 @@ import edu.vader.exporter.Main;
 public class Geocoding {
 	public String reverseLookUp(Coordinate coordinate) throws Exception{
 		JsonArray jsonArray = getJsonArrayFromCoordinate(coordinate);
-		
-		return null;
+		return getPlaceName(jsonArray);
 	}
 	
 	public JsonArray getJsonArrayFromCoordinate(Coordinate coordinate) throws Exception{
