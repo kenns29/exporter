@@ -33,6 +33,9 @@ public class ConfigProperties {
 	public ObjectId endObjectId = null;
 	public boolean stopAtEnd = false;
 	public int simpleRestletServerPort = 0;
+	
+	public int insertionReportInterval = 0;
+	public int documentReportInterval = 0;
 	public ConfigProperties() throws IOException{
 		this("config.properties");
 	}
@@ -82,6 +85,9 @@ public class ConfigProperties {
 		
 		this.stopAtEnd = Boolean.parseBoolean(prop.getProperty("stopAtEnd"));
 		this.simpleRestletServerPort = Integer.valueOf(prop.getProperty("simpleRestletServerPort"));
+		
+		this.insertionReportInterval = Integer.valueOf(prop.getProperty("insertionReportInterval"));
+		this.documentReportInterval = Integer.valueOf(prop.getProperty("documentReportInterval"));
 	}
 	
 	public void initStartEnd(MongoCollection<Document> coll){

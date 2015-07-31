@@ -69,7 +69,7 @@ public class InsertTweet {
 		PreparedStatement st = Main.conn.prepareStatement(prep);
 		int rowsUpdated = st.executeUpdate();
 		tweetCount += rowsUpdated;
-		if(tweetCount % Main.REPORT_INTERVAL == 0){
+		if(tweetCount % Main.configProperties.insertionReportInterval == 0){
 			LOGGER.info(tweetCount + " rows inserted into tweets");
 		}
 	}

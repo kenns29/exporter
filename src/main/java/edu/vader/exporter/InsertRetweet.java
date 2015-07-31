@@ -28,7 +28,7 @@ public class InsertRetweet {
 		PreparedStatement st = Main.conn.prepareStatement(prep);
 		int rowsUpdated = st.executeUpdate();
 		retweetCount += rowsUpdated;
-		if(retweetCount % Main.REPORT_INTERVAL == 0){
+		if(retweetCount % Main.configProperties.insertionReportInterval == 0){
 			LOGGER.info(retweetCount + " rows inserted into tweets");
 		}
 	}

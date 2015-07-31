@@ -26,7 +26,7 @@ public class InsertLink {
 		PreparedStatement st = Main.conn.prepareStatement(prep);
 		int rowsUpdated = st.executeUpdate();
 		linkCount += rowsUpdated;
-		if(linkCount % Main.REPORT_INTERVAL == 0){
+		if(linkCount % Main.configProperties.insertionReportInterval == 0){
 			LOGGER.info(linkCount + " rows inserted into tweets");
 		}
 	}

@@ -33,7 +33,6 @@ public class Main{
 	public static VersionControl versionControl =
 			new VersionControl(VERSION_MAJOR + "." + VERSION_MINOR + "." + BUILD_ID,
 				"07-30-2015");
-	public static final int REPORT_INTERVAL = 50;
 	public static ConfigProperties configProperties = null;
 	public static Properties props = new Properties();
 	public static Connection conn = null;
@@ -46,7 +45,6 @@ public class Main{
 	public static ObjectId currentObejctId = null;
 	public static ObjectId currentSafestObjectId = null;
 	public static int documentCount = 0;
-	public static final int DOCUMENT_REPORT_INTERVAL = 50;
 	
 	public static long mainStartTime = 0;
 	public static long preStartTime = 0;

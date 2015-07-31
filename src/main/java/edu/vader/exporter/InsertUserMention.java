@@ -31,7 +31,7 @@ public class InsertUserMention {
 		PreparedStatement st = Main.conn.prepareStatement(prep);
 		int rowsUpdated = st.executeUpdate();
 		userMentionCount += rowsUpdated;
-		if(userMentionCount % Main.REPORT_INTERVAL == 0){
+		if(userMentionCount % Main.configProperties.insertionReportInterval == 0){
 			LOGGER.info(userMentionCount + " rows inserted into user_mentions");
 		}
 	}

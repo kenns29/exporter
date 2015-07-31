@@ -24,7 +24,7 @@ public class InsertHashtag {
 		PreparedStatement st = Main.conn.prepareStatement(prep);
 		int rowsUpdated = st.executeUpdate();
 		hashtagCount += rowsUpdated;
-		if(hashtagCount % Main.REPORT_INTERVAL == 0){
+		if(hashtagCount % Main.configProperties.insertionReportInterval == 0){
 			LOGGER.info(hashtagCount + " rows inserted into hashtag");
 		}
 	}

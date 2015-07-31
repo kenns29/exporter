@@ -41,7 +41,7 @@ public class Convert {
 					Main.currentObejctId = doc.getObjectId("_id");
 					++Main.documentCount;
 					++Main.minuteDocCount;
-					if(Main.documentCount % Main.DOCUMENT_REPORT_INTERVAL == 0){
+					if(Main.documentCount % Main.configProperties.documentReportInterval == 0){
 						LOGGER.info(Main.documentCount + " documents have been processed, current object id is " + Main.currentObejctId);
 					}
 					long currentTime = System.currentTimeMillis();
