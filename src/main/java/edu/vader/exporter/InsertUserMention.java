@@ -16,15 +16,15 @@ public class InsertUserMention {
 	private String name = null;
 	private long tid = 0;
 	private ObjectId oid = null;
-	public InsertUserMention(ObjectId oid, long uid, String screen_name, String name, long tid){
-		this.uid = uid;
-		this.screen_name = escape + screen_name + escape;
-		this.name = escape + name + escape;
-		this.tid = tid;
+	public InsertUserMention(ObjectId oid, long tid){
 		this.oid = oid;
+		this.tid = tid;
+	}
+	public InsertUserMention(ObjectId oid, long uid, String screen_name, String name, long tid){
+		setUserMention(oid, uid, screen_name, name, tid);
 	}
 	
-	public int insert() throws Exception{
+	private int insert() throws Exception{
 		String prep = "INSERT into user_mention (uid, screen_name, name, tid) VALUES (" 
 				+ this.uid + ","
 				+ this.screen_name + "," 
@@ -36,7 +36,15 @@ public class InsertUserMention {
 		return rowsUpdated;
 	}
 	
-	public int deleteAllWithTid() throws Exception{
+	public void setUserMention(ObjectId oid, long uid, String screen_name, String name, long tid){
+		this.uid = uid;
+		this.screen_name = escape + screen_name + escape;
+		this.name = escape + name + escape;
+		this.tid = tid;
+		this.oid = oid;
+	}
+	
+	private int deleteAllWithTid() throws Exception{
 		String prep = "DELETE from user_mention"
 				+ " WHERE tid = " + this.tid;
 		PreparedStatement st = Main.conn.prepareStatement(prep);
@@ -44,6 +52,28 @@ public class InsertUserMention {
 		return rowsUpdated;
 	}
 	
+	public int deleteAllWithTidWithReport(){
+		boolean retryFlag = false;
+		int rowsUpdated = 0;
+		int errorCount = 0;
+		int errorCountLimit = 5;
+		do{
+			try{
+				rowsUpdated = deleteAllWithTid();
+				retryFlag = false;
+			}
+			catch(Exception e){
+				retryFlag = true;
+				++errorCount;
+				if(errorCount > errorCountLimit){
+					retryFlag = false;
+					HIGH_PRIORITY_LOGGER.error("did not successfully delete the User_Mention for tid " + this.tid + ", the Object Id is " + this.oid, e);
+				}
+			}
+		}
+		while(retryFlag);
+		return rowsUpdated;
+	}
 	public int insertWithReport(){
 		boolean retryFlag = false;
 		int rowsUpdated = 0;

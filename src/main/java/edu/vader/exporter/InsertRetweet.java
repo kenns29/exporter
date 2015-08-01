@@ -15,13 +15,21 @@ public class InsertRetweet {
 	private String screen_name_from = null;
 	private String screen_name_to = null;
 	private ObjectId oid = null;
+	
+	public InsertRetweet(ObjectId oid, long tid){
+		this.oid = oid;
+		this.tid = tid;
+	}
 	public InsertRetweet(ObjectId oid, long tid, String screen_name_from, String screen_name_to){
+		setRetweet(oid, tid, screen_name_from, screen_name_to);
+	}
+	
+	public void setRetweet(ObjectId oid, long tid, String screen_name_from, String screen_name_to){
 		this.tid = tid;
 		this.screen_name_from = escape + screen_name_from + escape;
 		this.screen_name_to = escape + screen_name_to + escape;
 		this.oid = oid;
 	}
-	
 	private int insert() throws Exception{
 		String prep = "INSERT into retweet (tid, screen_name_from, screen_name_to) VALUES (" 
 				+ this.tid + "," 
@@ -32,11 +40,34 @@ public class InsertRetweet {
 		
 		return rowsUpdated;
 	}
-	public int deleteAllWithTid() throws Exception{
+	private int deleteAllWithTid() throws Exception{
 		String prep = "DELETE from retweet"
 				+ " WHERE tid = " + this.tid;
 		PreparedStatement st = Main.conn.prepareStatement(prep);
 		int rowsUpdated = st.executeUpdate();
+		return rowsUpdated;
+	}
+	
+	public int deleteAllWithTidWithReport(){
+		boolean retryFlag = false;
+		int rowsUpdated = 0;
+		int errorCount = 0;
+		int errorCountLimit = 5;
+		do{
+			try{
+				rowsUpdated = deleteAllWithTid();
+				retryFlag = false;
+			}
+			catch(Exception e){
+				retryFlag = true;
+				++errorCount;
+				if(errorCount > errorCountLimit){
+					retryFlag = false;
+					HIGH_PRIORITY_LOGGER.error("did not successfully delete the Retweet for tid " + this.tid + ", the Object Id is " + this.oid, e);
+				}
+			}
+		}
+		while(retryFlag);
 		return rowsUpdated;
 	}
 	

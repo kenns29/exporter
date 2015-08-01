@@ -14,13 +14,20 @@ public class InsertHashtag {
 	private long tid = 0;
 	private String hashtag = null;
 	private ObjectId oid = null;
+	public InsertHashtag(ObjectId oid, long tid){
+		this.oid = oid;
+		this.tid = tid;
+	}
 	public InsertHashtag(ObjectId oid, long tid, String hashtag){
+		setInsertHashtag(oid, tid, hashtag);
+	}
+	
+	public void setInsertHashtag(ObjectId oid, long tid, String hashtag){
 		this.tid = tid;
 		this.hashtag = escape + hashtag + escape;
 		this.oid = oid;
 	}
-	
-	public int insert() throws SQLException{
+	private int insert() throws SQLException{
 		String prep = "INSERT into hashtag (tid, hashtag) VALUES (" 
 				+ this.tid + "," + this.hashtag + ")";
 		PreparedStatement st = Main.conn.prepareStatement(prep);
@@ -29,7 +36,7 @@ public class InsertHashtag {
 		return rowsUpdated;
 	}
 	
-	public int deleteAllWithTid() throws Exception{
+	private int deleteAllWithTid() throws Exception{
 		String prep = "DELETE from hashtag"
 				+ " WHERE tid = " + this.tid;
 		PreparedStatement st = Main.conn.prepareStatement(prep);
@@ -37,6 +44,28 @@ public class InsertHashtag {
 		return rowsUpdated;
 	}
 	
+	public int deleteAllWithTidWithReport(){
+		boolean retryFlag = false;
+		int rowsUpdated = 0;
+		int errorCount = 0;
+		int errorCountLimit = 5;
+		do{
+			try{
+				rowsUpdated = deleteAllWithTid();
+				retryFlag = false;
+			}
+			catch(Exception e){
+				retryFlag = true;
+				++errorCount;
+				if(errorCount > errorCountLimit){
+					retryFlag = false;
+					HIGH_PRIORITY_LOGGER.error("did not successfully delete the hashtag for tid " + this.tid + ", the Object Id is " + this.oid, e);
+				}
+			}
+		}
+		while(retryFlag);
+		return rowsUpdated;
+	}
 	public int insertWithReport(){
 		boolean retryFlag = false;
 		int rowsUpdated = 0;

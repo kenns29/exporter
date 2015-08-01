@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
+import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -25,7 +26,9 @@ public class InsertTweet {
 	public long time_numeric = 0;
 	public long uid = 0;
 	public String original_geo_field = null;
-	public InsertTweet(long tid, DateTime date, String tweet, String place, String language, int retweet_count, long uid, double longitude, double latitude, String original_geo_field){
+	
+	ObjectId oid = null;
+	public InsertTweet(ObjectId oid, long tid, DateTime date, String tweet, String place, String language, int retweet_count, long uid, double longitude, double latitude, String original_geo_field){
 		this.tid = tid;
 		this.date = date;
 		this.tweet = escape + tweet + escape;
@@ -36,9 +39,11 @@ public class InsertTweet {
 		this.longitude = longitude;
 		this.latitude = latitude;
 		this.original_geo_field = escape + original_geo_field + escape;
+		
+		this.oid = oid;
 	}
 	
-	public InsertTweet(long tid, long timestamp, String tweet, String place, String language, int retweet_count, long uid, double longitude, double latitude, String original_geo_field){
+	public InsertTweet(ObjectId oid, long tid, long timestamp, String tweet, String place, String language, int retweet_count, long uid, double longitude, double latitude, String original_geo_field){
 		DateTime date = new DateTime(timestamp);
 		
 		this.tid = tid;
@@ -51,6 +56,8 @@ public class InsertTweet {
 		this.longitude = longitude;
 		this.latitude = latitude;
 		this.original_geo_field = escape + original_geo_field + escape;
+	
+		this.oid = oid;
 	}
 	
 	private int insert() throws SQLException{
@@ -106,7 +113,7 @@ public class InsertTweet {
 					rowsUpdated = insert();
 					return rowsUpdated;
 				} catch (Exception e) {
-					LOGGER.error("did not succesfully insert " + tid + ", retry updating again.", e);
+					LOGGER.error("did not succesfully insert " + tid + ", retry updating again. Object id is " + this.oid, e);
 				}
 			}
 		}

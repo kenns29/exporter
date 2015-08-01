@@ -68,6 +68,7 @@ public class Convert {
 		CoordinateConverter coordinateConverter = new CoordinateConverter(doc);
 		if(coordinateConverter.isWithinBoundingBox()){
 			Coordinate coordinate = coordinateConverter.getCoordinate();
+			ObjectId oid = doc.getObjectId("_id");
 			long id = doc.getLong("id");
 			String text = doc.getString("text");
 			Document user = (Document) doc.get("user");
@@ -98,69 +99,78 @@ public class Convert {
 					HIGH_PRIORITY_LOGGER.error("Geocoding did not complete successfually, document with the error is tweet " + id + ". and the object id is " + doc.getObjectId("_id"));
 				}
 			}
-			InsertTweet insertTweet = new InsertTweet(id, timestamp, text, place , language, retweet_count, uid, lng, lat, coordinateConverter.getOriginal_geo_field());
+			InsertTweet insertTweet = new InsertTweet(oid, id, timestamp, text, place , language, retweet_count, uid, lng, lat, coordinateConverter.getOriginal_geo_field());
 			insertTweet.insertOrReplaceWithReport();
+			InsertUserMention insertUserMention = new InsertUserMention(oid, id);
+			InsertHashtag insertHashtag = new InsertHashtag(oid, id);
+			InsertLink insertLink = new InsertLink(oid, id);
+			InsertRetweet insertRetweet = new InsertRetweet(oid, id);
 			
-//			Document entities = (Document) doc.get("entities");
-//			if(entities != null){
-//				//Insert User Mentions
-//				ArrayList<Document> user_mentions = (ArrayList<Document>) entities.get("user_mentions");
-//				if(user_mentions != null){
-//					for(int i = 0; i < user_mentions.size(); i++){
-//						Document m = user_mentions.get(i);
-//						Object mUidObj = m.get("id");
-//						long mUid = -1;
-//						if(mUidObj instanceof Long){
-//							mUid = ((Long)mUidObj).longValue();
-//						}
-//						else if(mUidObj instanceof Integer){
-//							mUid = ((Integer)mUidObj).longValue();
-//						}
-//						String mScreen_name = m.getString("screen_name");
-//						String mName = m.getString("name");
-//						InsertUserMention insertUserMention = new InsertUserMention(mUid, mScreen_name, mName, id);
-//						insertUserMention.insert();
-//					}
-//				}
-//				//Insert Hashtags
-//				ArrayList<Document> hashtags = (ArrayList<Document>) entities.get("hashtags");
-//				if(hashtags != null){
-//					for(int i = 0; i < hashtags.size(); i++){
-//						Document tag = hashtags.get(i);
-//						String tagText = tag.getString("text");
-//						InsertHashtag insertHashtag = new InsertHashtag(id, tagText);
-//						insertHashtag.insert();
-//					}
-//				}
-//				
-//				//Insert Links
-//				ArrayList<Document> urls = (ArrayList<Document>) entities.get("urls");
-//				if(urls != null){
-//					for(int i = 0; i < urls.size(); i++){
-//						Document url = urls.get(i);
-//						String shortUrl = url.getString("url");
-//						InsertLink insertLink = new InsertLink(shortUrl, id);
-//						insertLink.insert();
-//					}
-//				}
-//			}
-//			
-//			//Insert retweet
-//			Document retweeted_status = (Document) doc.get("retweeted_status");
-//			if(retweeted_status != null){
-//				String screen_name_from = "";
-//				String screen_name_to = "";
-//				Document retweeted_user = (Document) retweeted_status.get("user");
-//				if(retweeted_user != null){
-//					screen_name_from = retweeted_user.getString("screen_name");
-//				}
-//				if(user != null){
-//					screen_name_to = user.getString("screen_name");
-//				}
-//				
-//				InsertRetweet insertRetweet = new InsertRetweet(id, screen_name_from, screen_name_to);
-//				insertRetweet.insert();
-//			}
+			insertUserMention.deleteAllWithTidWithReport();
+			insertHashtag.deleteAllWithTidWithReport();
+			insertLink.deleteAllWithTidWithReport();
+			insertRetweet.deleteAllWithTidWithReport();
+			
+			Document entities = (Document) doc.get("entities");
+			if(entities != null){
+				//Insert User Mentions
+				ArrayList<Document> user_mentions = (ArrayList<Document>) entities.get("user_mentions");
+				if(user_mentions != null){
+					for(int i = 0; i < user_mentions.size(); i++){
+						Document m = user_mentions.get(i);
+						Object mUidObj = m.get("id");
+						long mUid = -1;
+						if(mUidObj instanceof Long){
+							mUid = ((Long)mUidObj).longValue();
+						}
+						else if(mUidObj instanceof Integer){
+							mUid = ((Integer)mUidObj).longValue();
+						}
+						String mScreen_name = m.getString("screen_name");
+						String mName = m.getString("name");
+						insertUserMention.setUserMention(oid, mUid, mScreen_name, mName, id);
+						insertUserMention.insertWithReport();
+					}
+				}
+				//Insert Hashtags
+				ArrayList<Document> hashtags = (ArrayList<Document>) entities.get("hashtags");
+				if(hashtags != null){
+					for(int i = 0; i < hashtags.size(); i++){
+						Document tag = hashtags.get(i);
+						String tagText = tag.getString("text");
+						insertHashtag.setInsertHashtag(oid, id, tagText);
+						insertHashtag.insertWithReport();
+					}
+				}
+				
+				//Insert Links
+				ArrayList<Document> urls = (ArrayList<Document>) entities.get("urls");
+				if(urls != null){
+					for(int i = 0; i < urls.size(); i++){
+						Document url = urls.get(i);
+						String shortUrl = url.getString("url");
+						insertLink.setInsertLink(oid, shortUrl, id);
+						insertLink.insertWithReport();
+					}
+				}
+			}
+			
+			//Insert retweet
+			Document retweeted_status = (Document) doc.get("retweeted_status");
+			if(retweeted_status != null){
+				String screen_name_from = "";
+				String screen_name_to = "";
+				Document retweeted_user = (Document) retweeted_status.get("user");
+				if(retweeted_user != null){
+					screen_name_from = retweeted_user.getString("screen_name");
+				}
+				if(user != null){
+					screen_name_to = user.getString("screen_name");
+				}
+				
+				insertRetweet.setRetweet(oid, id, screen_name_from, screen_name_to);
+				insertRetweet.insertWithReport();
+			}
 		}
 	}
 }

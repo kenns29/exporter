@@ -15,12 +15,21 @@ public class InsertLink {
 	private String url = null;
 	private long tid = 0;
 	private ObjectId oid = null;
+	
+	public InsertLink(ObjectId oid, long tid){
+		this.oid = oid;
+		this.tid = tid;
+	}
+	
 	public InsertLink(ObjectId oid, String url, long tid){
+		setInsertLink(oid, url, tid);
+	}
+	
+	public void setInsertLink(ObjectId oid, String url, long tid){
 		this.url = escape + url + escape;
 		this.tid = tid;
 		this.oid = oid;
 	}
-	
 	private int insert() throws SQLException{
 		String prep = "INSERT into link (url, tid) VALUES (" 
 				+ this.url + "," 
@@ -30,11 +39,34 @@ public class InsertLink {
 		return rowsUpdated;
 	}
 	
-	public int deleteAllWithTid() throws Exception{
+	private int deleteAllWithTid() throws Exception{
 		String prep = "DELETE from link"
 				+ " WHERE tid = " + this.tid;
 		PreparedStatement st = Main.conn.prepareStatement(prep);
 		int rowsUpdated = st.executeUpdate();
+		return rowsUpdated;
+	}
+	
+	public int deleteAllWithTidWithReport(){
+		boolean retryFlag = false;
+		int rowsUpdated = 0;
+		int errorCount = 0;
+		int errorCountLimit = 5;
+		do{
+			try{
+				rowsUpdated = deleteAllWithTid();
+				retryFlag = false;
+			}
+			catch(Exception e){
+				retryFlag = true;
+				++errorCount;
+				if(errorCount > errorCountLimit){
+					retryFlag = false;
+					HIGH_PRIORITY_LOGGER.error("did not successfully delete the Link for tid " + this.tid + ", the Object Id is " + this.oid, e);
+				}
+			}
+		}
+		while(retryFlag);
 		return rowsUpdated;
 	}
 	
