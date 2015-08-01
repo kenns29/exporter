@@ -24,7 +24,7 @@ public class InsertUserMention {
 		this.oid = oid;
 	}
 	
-	public int insert() throws SQLException{
+	public int insert() throws Exception{
 		String prep = "INSERT into user_mention (uid, screen_name, name, tid) VALUES (" 
 				+ this.uid + ","
 				+ this.screen_name + "," 
