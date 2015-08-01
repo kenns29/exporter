@@ -11,10 +11,6 @@ public class DBUtils {
 		int rowsUpdated = st.executeUpdate();
 		System.out.println(rowsUpdated + " rows updated in retweet.");
 		
-		st = Main.conn.prepareStatement("DELETE FROM tweet");
-		rowsUpdated = st.executeUpdate();
-		System.out.println(rowsUpdated + " rows updated in tweet.");
-		
 		st = Main.conn.prepareStatement("DELETE FROM user_mention");
 		rowsUpdated = st.executeUpdate();
 		System.out.println(rowsUpdated + " rows updated in user_mention.");
@@ -26,5 +22,9 @@ public class DBUtils {
 		st = Main.conn.prepareStatement("DELETE FROM hashtag");
 		rowsUpdated = st.executeUpdate();
 		System.out.println(rowsUpdated + " rows updated in hashtag.");
+		
+		st = Main.conn.prepareStatement("DELETE FROM tweet");
+		rowsUpdated = st.executeUpdate();
+		System.out.println(rowsUpdated + " rows updated in tweet.");
 	}
 }
