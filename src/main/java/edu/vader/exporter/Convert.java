@@ -94,6 +94,7 @@ public class Convert {
 		String text = doc.getString("text");
 		Document user = (Document) doc.get("user");
 		long uid = 0;
+		int cat = doc.getInteger("cat", -1);
 		if(user != null){
 			Object uidObj = user.get("id");
 			if(uidObj instanceof Long){
@@ -120,7 +121,7 @@ public class Convert {
 				HIGH_PRIORITY_LOGGER.error("Geocoding did not complete successfually, document with the error is tweet " + id + ". and the object id is " + doc.getObjectId("_id"));
 			}
 		}
-		InsertTweet insertTweet = new InsertTweet(oid, id, timestamp, text, place , language, retweet_count, uid, lng, lat, coordinateConverter.getOriginal_geo_field());
+		InsertTweet insertTweet = new InsertTweet(oid, id, timestamp, text, place , language, retweet_count, uid, lng, lat, coordinateConverter.getOriginal_geo_field(), cat);
 		insertTweet.insertOrReplaceWithReport();
 		InsertUserMention insertUserMention = new InsertUserMention(oid, id);
 		InsertHashtag insertHashtag = new InsertHashtag(oid, id);

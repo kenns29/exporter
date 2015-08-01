@@ -26,9 +26,10 @@ public class InsertTweet {
 	public long time_numeric = 0;
 	public long uid = 0;
 	public String original_geo_field = null;
+	public int cat = -1;
 	
 	ObjectId oid = null;
-	public InsertTweet(ObjectId oid, long tid, DateTime date, String tweet, String place, String language, int retweet_count, long uid, double longitude, double latitude, String original_geo_field){
+	public InsertTweet(ObjectId oid, long tid, DateTime date, String tweet, String place, String language, int retweet_count, long uid, double longitude, double latitude, String original_geo_field, int cat){
 		this.tid = tid;
 		this.date = date;
 		this.tweet = escape + tweet + escape;
@@ -39,11 +40,12 @@ public class InsertTweet {
 		this.longitude = longitude;
 		this.latitude = latitude;
 		this.original_geo_field = escape + original_geo_field + escape;
+		this.cat = cat;
 		
 		this.oid = oid;
 	}
 	
-	public InsertTweet(ObjectId oid, long tid, long timestamp, String tweet, String place, String language, int retweet_count, long uid, double longitude, double latitude, String original_geo_field){
+	public InsertTweet(ObjectId oid, long tid, long timestamp, String tweet, String place, String language, int retweet_count, long uid, double longitude, double latitude, String original_geo_field, int cat){
 		DateTime date = new DateTime(timestamp);
 		
 		this.tid = tid;
@@ -56,13 +58,14 @@ public class InsertTweet {
 		this.longitude = longitude;
 		this.latitude = latitude;
 		this.original_geo_field = escape + original_geo_field + escape;
-	
+		this.cat = cat;
+		
 		this.oid = oid;
 	}
 	
 	private int insert() throws SQLException{
 		String timestamp = "TIMESTAMP '" + convertDateTimeToTimeString(this.date) + "'";
-		String prep = "INSERT into tweet (tid, date, tweet, place, language, retweet_count, uid, longitude, latitude, original_geo_field) VALUES (" 
+		String prep = "INSERT into tweet (tid, date, tweet, place, language, retweet_count, uid, longitude, latitude, original_geo_field, cat) VALUES (" 
 				+ this.tid + "," 
 				+ timestamp + "," 
 				+ this.tweet + "," 
@@ -72,7 +75,8 @@ public class InsertTweet {
 				+ this.uid + ","
 				+ ((this.longitude != Convert.INVALID_COORDINATE_DOUBLE) ? this.longitude : "NULL") + ","
 				+ ((this.latitude != Convert.INVALID_COORDINATE_DOUBLE) ?  this.latitude : "NULL")+ ","
-				+ ((this.original_geo_field != null) ? this.original_geo_field : "NULL") + ")";
+				+ ((this.original_geo_field != null) ? this.original_geo_field : "NULL") + ","
+				+ this.cat + ")";
 		PreparedStatement st = Main.conn.prepareStatement(prep);
 		int rowsUpdated = st.executeUpdate();
 		return rowsUpdated;
@@ -89,7 +93,8 @@ public class InsertTweet {
 				+ " uid = " + this.uid + ","
 				+ " longitude = " + ((this.longitude != Convert.INVALID_COORDINATE_DOUBLE) ? this.longitude : "NULL") + ","
 				+ " latitude = " + ((this.latitude != Convert.INVALID_COORDINATE_DOUBLE) ?  this.latitude : "NULL")+ ","
-				+ " original_geo_field = " + ((this.original_geo_field != null) ? this.original_geo_field : "NULL") 
+				+ " original_geo_field = " + ((this.original_geo_field != null) ? this.original_geo_field : "NULL") + ","
+				+ " cat = " + this.cat
 				+ " WHERE tid = " + this.tid;
 		PreparedStatement st = Main.conn.prepareStatement(prep);
 		int rowsUpdated = st.executeUpdate();
