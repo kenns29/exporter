@@ -25,7 +25,7 @@ import edu.vader.version.VersionControl;
 
 public class Main{
 	public static final int VERSION_MAJOR = 1;
-	public static final int VERSION_MINOR = 0;
+	public static final int VERSION_MINOR = 1;
 	public static final int BUILD_ID = 0;
 	
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
