@@ -85,8 +85,9 @@ public class Main{
 	}
 	
 	public static void main(String args[]) throws Exception{
-		//DBUtils.deleteAll();
-
+		if(Main.configProperties.deleteOldData){
+			DBUtils.deleteAll();
+		}
 		EmbeddedServerComponent server = new EmbeddedServerComponent(Main.configProperties.simpleRestletServerPort);
 		server.start();
 		Run run = new Run();

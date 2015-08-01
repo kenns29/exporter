@@ -21,6 +21,7 @@ public class ConfigProperties {
 	public int inputDataPort = 0;
 	public String inputDataDB = null;
 	public String inputDataColl = null;
+	public int catID = 0;
 	
 	public String dataScienceToolkitBaseUrl = null;
 	public String coordinate2politicsUrl = null;
@@ -36,6 +37,8 @@ public class ConfigProperties {
 	
 	public int insertionReportInterval = 0;
 	public int documentReportInterval = 0;
+	
+	public boolean deleteOldData = false;
 	public ConfigProperties() throws IOException{
 		this("config.properties");
 	}
@@ -69,6 +72,7 @@ public class ConfigProperties {
 		this.inputDataPort = Integer.valueOf(prop.getProperty("inputDataPort"));
 		this.inputDataDB = prop.getProperty("inputDataDB");
 		this.inputDataColl = prop.getProperty("inputDataColl");
+		this.catID = Integer.valueOf(prop.getProperty("catID"));
 		
 		this.nerProgramBaseUrl = prop.getProperty("nerProgramBaseUrl");
 		this.safestObjectIdUrl = prop.getProperty("safestObjectIdUrl");
@@ -88,6 +92,8 @@ public class ConfigProperties {
 		
 		this.insertionReportInterval = Integer.valueOf(prop.getProperty("insertionReportInterval"));
 		this.documentReportInterval = Integer.valueOf(prop.getProperty("documentReportInterval"));
+		
+		this.deleteOldData = Boolean.parseBoolean(prop.getProperty("deleteOldData"));				
 	}
 	
 	public void initStartEnd(MongoCollection<Document> coll){
