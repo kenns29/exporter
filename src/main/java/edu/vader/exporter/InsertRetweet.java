@@ -93,7 +93,7 @@ public class InsertRetweet {
 		while(retryFlag);
 		retweetCount += rowsUpdated;
 		if(retweetCount % Main.configProperties.insertionReportInterval == 0){
-			LOGGER.info(retweetCount + " rows inserted into tweets");
+			LOGGER.info(retweetCount + " rows inserted into retweets");
 		}
 		return rowsUpdated;
 	}

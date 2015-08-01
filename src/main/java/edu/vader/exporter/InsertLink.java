@@ -92,7 +92,7 @@ public class InsertLink {
 		while(retryFlag);
 		linkCount += rowsUpdated;
 		if(linkCount % Main.configProperties.insertionReportInterval == 0){
-			LOGGER.info(linkCount + " rows inserted into tweets");
+			LOGGER.info(linkCount + " rows inserted into links");
 		}
 		return rowsUpdated;
 		
