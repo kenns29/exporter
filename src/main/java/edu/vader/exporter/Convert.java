@@ -13,6 +13,10 @@ import com.vividsolutions.jts.geom.Coordinate;
 import edu.vader.geocode.Geocoding;
 
 public class Convert {
+	private class HasNextTime{
+		public long time = 0;
+	}
+	private static final Logger DEBUG_LOGGER = Logger.getLogger("debugLog");
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	public static final double INVALID_COORDINATE_DOUBLE = -1000;
@@ -35,15 +39,32 @@ public class Convert {
 		this.convertMongoToSql(query);
 	}
 	
-	public void convertMongoToSql(Document query) throws Exception{	
+	public void convertMongoToSql(Document query) throws Exception{
+		DEBUG_LOGGER.info("query = " + query.toJson());
 		FindIterable<Document> iterable = Main.mongoColl.find(query).sort(new Document("_id", 1));
 		MongoCursor<Document> mongoCursor = iterable.iterator();
 		
 		try{
-			while(mongoCursor.hasNext()){
+			HasNextTime hasNextTime = new HasNextTime();
+			while(hasNext(mongoCursor, hasNextTime)){
+				
+				long startTime = System.currentTimeMillis();
+				long getDocStartTime = System.currentTimeMillis();
 				Document doc = mongoCursor.next();
+				long getDocEndTime = System.currentTimeMillis();
+				long docGetTime = getDocEndTime - getDocStartTime;
+				long convertTime = 0;
+				
+				if(hasNextTime.time > 0){
+					if(hasNextTime.time > 0){
+						DEBUG_LOGGER.info("hasNext time = " + hasNextTime.time + " milliseconds. doc = " + doc.toJson());
+					}
+				}
 				try{
+					long convertStartTime = System.currentTimeMillis();
 					convertOneDocWithFilter(doc);
+					long convertEndTime = System.currentTimeMillis();
+					convertTime = convertEndTime - convertStartTime;
 					Main.currentObejctId = doc.getObjectId("_id");
 					++Main.documentCount;
 					++Main.minuteDocCount;
@@ -60,6 +81,14 @@ public class Convert {
 				catch(Exception e){
 					HIGH_PRIORITY_LOGGER.error("Document " + doc.getObjectId("_id") + " caused an error.", e);
 				}
+				
+				long endTime = System.currentTimeMillis();
+				long elapsedTime = endTime - startTime;
+				if(elapsedTime > 0){
+					DEBUG_LOGGER.info("one loop time = " + elapsedTime 
+							+ ", convert time = " + convertTime + " milliseconds. " 
+							+  "doc get time = " + docGetTime + " milliseconds.");
+				}
 			}
 		}
 		finally{
@@ -67,7 +96,13 @@ public class Convert {
 		}
 	}
 	
-	
+	private boolean hasNext(MongoCursor<Document> mongoCursor, HasNextTime hasNextTime){
+		long hasNextStartTime = System.currentTimeMillis();
+		boolean has = mongoCursor.hasNext();
+		long hasNextEndTime = System.currentTimeMillis();
+		hasNextTime.time = hasNextEndTime - hasNextStartTime;
+		return has;
+	}
 	private void convertOneDocWithFilter(Document doc) throws Exception{
 		if(Main.configProperties.catID > 0){
 			int cat = doc.getInteger("cat", -1);
