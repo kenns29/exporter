@@ -1,6 +1,5 @@
 package edu.vader.exporter;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
@@ -11,12 +10,9 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import com.vividsolutions.jts.geom.Coordinate;
 
-import edu.vader.bulkInsert.BulkInsertHashtag;
-import edu.vader.bulkInsert.BulkInsertTweet;
-import edu.vader.bulkInsert.BulkInsertURL;
 import edu.vader.geocode.Geocoding;
 
-public class Convert{
+public class Convert {
 	private class HasNextTime{
 		public long time = 0;
 	}
@@ -24,16 +20,6 @@ public class Convert{
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	public static final double INVALID_COORDINATE_DOUBLE = -1000;
-	
-	private BulkInsertTweet bulkInsertTweet = null;
-	private BulkInsertHashtag bulkInsertHashtag = null;
-	private BulkInsertURL bulkInsertURL = null;
-	private int numRows = 0;
-	public Convert() throws SQLException{
-		bulkInsertTweet = new BulkInsertTweet();
-		bulkInsertHashtag = new BulkInsertHashtag();
-		bulkInsertURL = new BulkInsertURL();
-	}
 	public void convertMongoToSql() throws Exception{
 		if(Main.configProperties.catID >= 0){
 			Document query = new Document("cat", Main.configProperties.catID);
@@ -56,7 +42,6 @@ public class Convert{
 	public void convertMongoToSql(Document query) throws Exception{
 		DEBUG_LOGGER.info("query = " + query.toJson());
 		FindIterable<Document> iterable = Main.mongoColl.find(query).sort(new Document("_id", 1));
-		iterable.noCursorTimeout(true);
 		MongoCursor<Document> mongoCursor = iterable.iterator();
 		
 		try{
@@ -77,8 +62,7 @@ public class Convert{
 				}
 				try{
 					long convertStartTime = System.currentTimeMillis();
-					//convertOneDocWithFilter(doc);
-					
+					convertOneDocWithFilter(doc);
 					long convertEndTime = System.currentTimeMillis();
 					convertTime = convertEndTime - convertStartTime;
 					Main.currentObejctId = doc.getObjectId("_id");
@@ -119,10 +103,6 @@ public class Convert{
 		hasNextTime.time = hasNextEndTime - hasNextStartTime;
 		return has;
 	}
-	
-	private int convertOneAndInsertToBulk(Document doc){
-		
-	}
 	private void convertOneDocWithFilter(Document doc) throws Exception{
 		if(Main.configProperties.catID > 0){
 			int cat = doc.getInteger("cat", -1);
@@ -140,6 +120,7 @@ public class Convert{
 			}
 		}
 	}
+	
 	@SuppressWarnings("unchecked")
 	private void convertOneDoc(Document doc, CoordinateConverter coordinateConverter){
 		Coordinate coordinate = coordinateConverter.getCoordinate();
