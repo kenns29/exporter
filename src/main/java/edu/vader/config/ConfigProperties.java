@@ -14,14 +14,22 @@ import com.mongodb.client.MongoCollection;
 import edu.vader.util.MongoUtils;
 
 public class ConfigProperties {
+	// Task settings for export to PostgreSQL
+	public boolean exportPostgreSqlTask = false;
+	public int exportPostgreSqlTaskCatID = 0;
+	public String exportPostgreSqlTaskBBFile = null;
 	public String postgresqlDataUrl = null;
 	public String postgresqlUser = null;
 	
+	// Task settings for export to MongoDB web docs url queue
+	public boolean exportUrlsTask = false;
+	public int exportUrlsTaskCatID = 0;
+
+	// General settings
 	public String inputDataHost = null;
 	public int inputDataPort = 0;
 	public String inputDataDB = null;
 	public String inputDataColl = null;
-	public int catID = 0;
 	
 	public String dataScienceToolkitBaseUrl = null;
 	public String coordinate2politicsUrl = null;
@@ -62,17 +70,22 @@ public class ConfigProperties {
 			throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
 		}
 		
-		this.dataScienceToolkitBaseUrl = prop.getProperty("dataScienceToolkitBaseUrl");
-		this.coordinate2politicsUrl = prop.getProperty("coordinate2politicsUrl");
-		
+		this.exportPostgreSqlTask = Boolean.parseBoolean(prop.getProperty("exportPostgreSqlTask"));
+		this.exportPostgreSqlTaskCatID = Integer.valueOf(prop.getProperty("exportPostgreSqlTaskCatID"));
+		this.exportPostgreSqlTaskBBFile = prop.getProperty("exportPostgreSqlTaskBBFile");
 		this.postgresqlDataUrl = prop.getProperty("postgresqlDataUrl");
 		this.postgresqlUser = prop.getProperty("postgresqlUser");
+
+		this.exportUrlsTask = Boolean.parseBoolean(prop.getProperty("exportUrlsTask"));
+		this.exportUrlsTaskCatID = Integer.valueOf(prop.getProperty("exportUrlsTaskCatID"));
 		
+		this.dataScienceToolkitBaseUrl = prop.getProperty("dataScienceToolkitBaseUrl");
+		this.coordinate2politicsUrl = prop.getProperty("coordinate2politicsUrl");
+				
 		this.inputDataHost = prop.getProperty("inputDataHost");
 		this.inputDataPort = Integer.valueOf(prop.getProperty("inputDataPort"));
 		this.inputDataDB = prop.getProperty("inputDataDB");
 		this.inputDataColl = prop.getProperty("inputDataColl");
-		this.catID = Integer.valueOf(prop.getProperty("catID"));
 		
 		this.nerProgramBaseUrl = prop.getProperty("nerProgramBaseUrl");
 		this.safestObjectIdUrl = prop.getProperty("safestObjectIdUrl");

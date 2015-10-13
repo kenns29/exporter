@@ -20,16 +20,18 @@ public class Convert {
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	public static final double INVALID_COORDINATE_DOUBLE = -1000;
-	public void convertMongoToSql() throws Exception{
-		if(Main.configProperties.catID >= 0){
-			Document query = new Document("cat", Main.configProperties.catID);
+	
+	public void convertMongoToSql() throws Exception {
+		int sqlTaskCatID = Main.configProperties.exportPostgreSqlTaskCatID;
+		int urlTaskCatID = Main.configProperties.exportUrlsTaskCatID;
+		if ( (sqlTaskCatID == urlTaskCatID) && sqlTaskCatID >= 0) {
+			Document query = new Document("cat", sqlTaskCatID);
 			this.convertMongoToSql(query);
 		}
-		else{
+		else {
 			Document query = new Document();
 			this.convertMongoToSql(query);
 		}
-		
 	}
 	
 	public void convertMongoToSql(ObjectId startObjectId, ObjectId endObjectId) throws Exception{
@@ -104,19 +106,21 @@ public class Convert {
 		return has;
 	}
 	private void convertOneDocWithFilter(Document doc) throws Exception{
-		if(Main.configProperties.catID > 0){
-			int cat = doc.getInteger("cat", -1);
-			if(cat == Main.configProperties.catID){
+		int sqlTaskCatID = Main.configProperties.exportPostgreSqlTaskCatID;
+		int urlTaskCatID = Main.configProperties.exportUrlsTaskCatID;
+		int cat = doc.getInteger("cat", -1);
+		
+		if (Main.configProperties.exportPostgreSqlTask) {
+			if (sqlTaskCatID < 0 || (sqlTaskCatID >= 0 && cat == sqlTaskCatID)) {
 				CoordinateConverter coordinateConverter = new CoordinateConverter(doc);
-				if(coordinateConverter.isWithinBoundingBox()){
+				if (coordinateConverter.isWithinBoundingBox()) {
 					convertOneDoc(doc, coordinateConverter);
 				}
 			}
 		}
-		else{
-			CoordinateConverter coordinateConverter = new CoordinateConverter(doc);
-			if(coordinateConverter.isWithinBoundingBox()){
-				convertOneDoc(doc, coordinateConverter);
+		if (Main.configProperties.exportUrlsTask) {
+			if (urlTaskCatID < 0 || (urlTaskCatID >= 0 && cat == urlTaskCatID)) {
+				// export to url queue
 			}
 		}
 	}

@@ -13,18 +13,25 @@ import com.vividsolutions.jts.geom.Polygon;
 import edu.vader.util.Utils;
 
 public class GeoBoundingBox {
-	private GeometryFactory geomFac = new GeometryFactory();
+	private static GeometryFactory geomFac = new GeometryFactory();
 	private Polygon boundingBox = null;
 	
+	/**
+	 * Create a boundary object from a GeoJSON Feature Collection
+	 * JSON file.  See http://geojson.org/geojson-spec.html
+	 * @param fileName File name of GeoJSON file
+	 * @throws IOException
+	 */
 	public GeoBoundingBox(String fileName) throws IOException{
 		this.setBoundingBox(getBoundingBoxPolygonFromFile(fileName));
 	}
-	public JsonObject readGeojsonFromFile(String name) throws IOException{
+	
+	public static JsonObject readGeojsonFromFile(String name) throws IOException{
 		String jsonStr = Utils.readFile(name);
 		return new JsonParser().parse(jsonStr).getAsJsonObject();
 	}
 	
-	public Polygon getBoundingBoxPolygon(JsonObject jsonObject){
+	public static Polygon getBoundingBoxPolygon(JsonObject jsonObject){
 		JsonArray jsonArray = jsonObject.get("features").getAsJsonArray();
 		JsonObject featureObj = jsonArray.get(0).getAsJsonObject();
 		JsonObject geometry = featureObj.get("geometry").getAsJsonObject();
@@ -40,14 +47,16 @@ public class GeoBoundingBox {
 		return geomFac.createPolygon(coordinates);
 	}
 	
-	public Polygon getBoundingBoxPolygonFromFile(String name) throws IOException{
+	public static Polygon getBoundingBoxPolygonFromFile(String name) throws IOException{
 		JsonObject jsonObj = readGeojsonFromFile(name);
 		return getBoundingBoxPolygon(jsonObj);
 	}
+	
 	public Polygon getBoundingBox() {
 		return boundingBox;
 	}
-	public void setBoundingBox(Polygon boundingBox) {
+	
+	private void setBoundingBox(Polygon boundingBox) {
 		this.boundingBox = boundingBox;
 	}
 }

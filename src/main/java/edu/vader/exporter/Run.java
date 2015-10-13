@@ -14,7 +14,7 @@ public class Run {
 	public Run(){
 		
 	}
-	public void convertWithSafestObjectId(){
+	public void processWithSafestObjectId(){
 		boolean firstStart = true;
 		ObjectId startObjectId = Main.configProperties.startObjectId;
 		startObjectId = TimeUtils.decrementObjectId(startObjectId);
@@ -65,7 +65,7 @@ public class Run {
 			startObjectId = Main.currentSafestObjectId;
 		}
 	}
-	public void convertWithStartEndObjectId(){
+	public void processWithStartEndObjectId(){
 		ObjectId startObjectId = Main.configProperties.startObjectId;
 		ObjectId endObjectId = Main.configProperties.endObjectId;
 		Main.mainStartTime = System.currentTimeMillis();

@@ -40,7 +40,7 @@ public class Main{
 	public static MongoDatabase mongoDatabase = null; 
 	public static MongoCollection<Document> mongoColl = null; 
 	public static GeoHandler geoHandler = new GeoHandler();
-	public static GeoBoundingBox geoBoundingBox = null; 
+	public static GeoBoundingBox exportSqlGeoBoundingBox = null;
 	
 	public static ObjectId currentObejctId = null;
 	public static ObjectId currentSafestObjectId = null;
@@ -75,10 +75,12 @@ public class Main{
 		}
 		PropertyConfigurator.configure(logProps);
 		
-		try {
-			geoBoundingBox = new GeoBoundingBox("boundingBox.txt");
-		} catch (IOException e) {
-			HIGH_PRIORITY_LOGGER.error("can not load the bounding box", e);
+		if (configProperties.exportPostgreSqlTask) {
+			try {
+				exportSqlGeoBoundingBox = new GeoBoundingBox(configProperties.exportPostgreSqlTaskBBFile);
+			} catch (IOException e) {
+				HIGH_PRIORITY_LOGGER.error("can not load the bounding box", e);
+			}
 		}
 		
 		configProperties.initStartEnd(mongoColl);
@@ -92,10 +94,10 @@ public class Main{
 		server.start();
 		Run run = new Run();
 		if(Main.configProperties.stopAtEnd){
-			run.convertWithStartEndObjectId();
+			run.processWithStartEndObjectId();
 		}
 		else{
-			run.convertWithSafestObjectId();
+			run.processWithSafestObjectId();
 		}
 	}
 }
